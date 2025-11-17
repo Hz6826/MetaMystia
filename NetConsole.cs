@@ -31,7 +31,8 @@ public class NetConsole
             { "echo", EchoCommand },
             { "log", LogCommand },
             { "get", GetCommand },
-            { "set", SetCommand }
+            { "set", SetCommand },
+            { "mp", MultiplayerCommand }
         };
     }
 
@@ -419,6 +420,96 @@ public class NetConsole
             default:
                 SendToClient(client, $"Unknown field: {field}\n");
                 SendToClient(client, "Available fields: playerposition <x> <y>, kyoukoposition <x> <y>, kyoukomoving <true|false>\n");
+                break;
+        }
+    }
+
+    // Command: mp - Multiplayer commands
+    private void MultiplayerCommand(string[] args, TcpClient client)
+    {
+        if (args.Length == 0)
+        {
+            SendToClient(client, "Usage: mp <subcommand> [args]\n");
+            SendToClient(client, "Subcommands:\n");
+            SendToClient(client, "  start            - Start multiplayer\n");
+            SendToClient(client, "  stop             - Stop multiplayer\n");
+            SendToClient(client, "  status           - Show connection status\n");
+            SendToClient(client, "  ping             - Send ping to peer\n");
+            SendToClient(client, "  id               - Show local ID\n");
+            SendToClient(client, "  connect <ip>     - Connect to peer IP\n");
+            SendToClient(client, "  disconnect       - Disconnect from peer\n");
+            return;
+        }
+
+        string subcommand = args[0].ToLower();
+
+        switch (subcommand)
+        {
+            case "start":
+                MultiplayerManager.Instance.Start();
+                SendToClient(client, "Multiplayer started\n");
+                break;
+
+            case "stop":
+                MultiplayerManager.Instance.Stop();
+                SendToClient(client, "Multiplayer stopped\n");
+                break;
+
+            case "status":
+                string status = MultiplayerManager.Instance.GetStatus();
+                SendToClient(client, status);
+                break;
+
+            case "ping":
+                if (!MultiplayerManager.Instance.IsConnected())
+                {
+                    SendToClient(client, "Error: Not connected to peer\n");
+                }
+                else
+                {
+                    MultiplayerManager.Instance.SendPing();
+                    SendToClient(client, "Ping sent\n");
+                }
+                break;
+
+            case "id":
+                string localId = MultiplayerManager.Instance.GetLocalId();
+                SendToClient(client, $"Local ID: {localId}\n");
+                break;
+
+            case "connect":
+                if (args.Length < 2)
+                {
+                    SendToClient(client, "Usage: mp connect <ip>\n");
+                    break;
+                }
+
+                string targetIp = args[1];
+                if (MultiplayerManager.Instance.ConnectToPeer(targetIp))
+                {
+                    SendToClient(client, $"Connected to {targetIp}\n");
+                }
+                else
+                {
+                    SendToClient(client, $"Failed to connect to {targetIp}\n");
+                }
+                break;
+
+            case "disconnect":
+                if (!MultiplayerManager.Instance.IsConnected())
+                {
+                    SendToClient(client, "No active connection\n");
+                }
+                else
+                {
+                    MultiplayerManager.Instance.DisconnectPeer();
+                    SendToClient(client, "Disconnected\n");
+                }
+                break;
+
+            default:
+                SendToClient(client, $"Unknown subcommand: {subcommand}\n");
+                SendToClient(client, "Available subcommands: start, stop, status, ping, id, connect, disconnect\n");
                 break;
         }
     }
