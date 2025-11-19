@@ -150,6 +150,17 @@ public class MystiaManager
         return true;
     }
 
+    public float GetMoveSpeed()
+    {
+        var characterUnit = GetCharacterUnit();
+        if (characterUnit == null)
+        {
+            Log.LogWarning("GetCharacterUnit returned null in GetMoveSpeed");
+            return 1.0f;
+        }
+        return characterUnit.MoveSpeedMultiplier;
+    }
+
     public Vector3 GetInputDirection()
     {
         var characterUnit = GetCharacterUnit();

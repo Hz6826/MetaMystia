@@ -16,11 +16,11 @@ public class KyoukoManager
 
     public static string MapLabel { get; private set; }
     public static bool IsKyoukoVisible { get; private set; } = true;
-    private static Vector2 positionOffset;          // 位置偏移量 (收到同步信息时)= 同步位置 - 本地 Kyouko 位置         (FixedUpdate 时计算) positionOffset -= actualCurrectVelocity * Time.fixedDeltaTime;
-    private static Vector2 expectedCurrectVelocity; // 预期修正速度 = 位置偏移量 / 修正系数 / Time.fixedDeltaTime               (同步时计算)
-    private static Vector2 actualCurrectVelocity;   // 实际修正速度 = min{预期修正速度, positionOffset / Time.fixedDeltaTime}   (FixedUpdate)
-    private static float currectCoefficient = 10.0f;        // 修正系数
+    private static bool isForceSync = true;
 
+    private static Vector2 actualVelocity;
+    private static Vector2 positionOffset;
+    private static Vector2 currectVelocity;
     public static KyoukoManager Instance
     {
         get
@@ -46,21 +46,37 @@ public class KyoukoManager
     public void OnFixedUpdate()
     {
         // 在每个 FixedUpdate 执行位置修正
-        if (positionOffset.magnitude > 0.001f)
+        
+        // if (positionOffset.magnitude > 0.001f)
+        // {
+        //     return;
+        // }
+
+        // 位移(px) = 速度(px/s) * 时间 * 速度倍率(5) * 奔跑倍率(1 or 1.5)
+        // 实际速度由对端同步而来
+        // 修正速度要保证在 一定时间内 完成位置修正
+        currectVelocity = positionOffset / 0.5f / 5f;
+        positionOffset -= currectVelocity * Time.fixedDeltaTime * 5f * GetCharacterUnit().sprintMultiplier;
+
+        // 这样假设位置偏差为 3px, dt = 0.02s
+        // currectVelocity = 3 / 0.5 / 5 = 1.2 px/s
+        // 位置偏差每帧减少 0.02s * 1.2 px/s * 5 = 0.12 px
+        // 每帧修正 0.12px / 3px = 4%
+        // 25 帧修正为 96% ^ 25 = 36%
+        // 50 帧修正为 96% ^ 50 = 13%
+        // 100 帧修正为 96% ^ 100 = 1.7%
+
+        // 每 Fixed Frame 都要根据 actualVelocity + currectVelocity 设置实际速度
+        var velocity = actualVelocity + currectVelocity;
+        if (velocity.magnitude < 0.01f)
         {
-            // 计算实际修正速度
-            float maxCorrection = positionOffset.magnitude / Time.fixedDeltaTime;
-            actualCurrectVelocity = Vector2.ClampMagnitude(expectedCurrectVelocity, maxCorrection);
-            
-            // 应用修正
-            positionOffset -= actualCurrectVelocity * Time.fixedDeltaTime;
-            
-            var rb = GetRigidbody2D();
-            Log.LogWarning($"[DEBUG] before: rb.position = {rb.position}");
-            rb.position += actualCurrectVelocity * Time.fixedDeltaTime;
-            Log.LogWarning($"[DEBUG] after:  rb.position = {rb.position}");
-            Log.LogMessage($"[FixedUpdate] Kyouko position correction: offset={positionOffset.magnitude:F4}, velocity={actualCurrectVelocity.magnitude:F4}");
+            SetMoving(false);
+            SetMoveSpeed(1.48f);
+            return;
         }
+        SetMoving(true);
+        var characterUnit = GetCharacterUnit();
+        characterUnit.UpdateInputVelocity(velocity);
     }
 
     public CharacterConditionComponent GetCharacterComponent()
@@ -156,7 +172,7 @@ public class KyoukoManager
             return false;
         }
         characterUnit.IsMoving = isMoving;
-        Log.LogMessage($"已设置 Kyouko 移动状态为 {isMoving}");
+        // Log.LogMessage($"已设置 Kyouko 移动状态为 {isMoving}");
         return true;
     }
 
@@ -173,15 +189,26 @@ public class KyoukoManager
             Log.LogWarning("Cannot set input direction: Kyouko is not visible");
             return;
         }
+        if (isForceSync)
+        {
+            var rb = GetRigidbody2D();
+            if (rb != null)
+            {
+                rb.position = syncPosition;
+                Log.LogMessage($"Force position sync for Kyouko to ({syncPosition.x}, {syncPosition.y})");
+                actualVelocity = inputDirection;
+            }
+            isForceSync = false;
+        }
 
         var characterUnit = GetCharacterUnit();
         
-        characterUnit.UpdateInputVelocity(inputDirection);
+        // characterUnit.UpdateInputVelocity(inputDirection);
+        actualVelocity = inputDirection;
         characterUnit.IsMoving = inputDirection.magnitude > 0;
         Log.LogMessage($"Update input direction: ({inputDirection.x}, {inputDirection.y})");
 
         positionOffset = syncPosition - characterUnit.rb2d.position;
-        expectedCurrectVelocity = positionOffset / currectCoefficient / Time.fixedDeltaTime;
     }
 
     public void UpdateSprintState(bool isSprinting, Vector2 syncPosition)
@@ -192,13 +219,12 @@ public class KyoukoManager
             return;
         }
 
-        var characterUnit = GetCharacterUnit();
 
+        var characterUnit = GetCharacterUnit();
         characterUnit.sprintMultiplier = isSprinting ? 1.5f : 1.0f;
         Log.LogMessage($"Update sprint state: {isSprinting}");
 
         positionOffset = syncPosition - characterUnit.rb2d.position;
-        expectedCurrectVelocity = positionOffset / currectCoefficient / Time.fixedDeltaTime;
     }
 
     public float GetMoveSpeed()
@@ -263,6 +289,7 @@ public class KyoukoManager
 
         if (IsKyoukoVisible)
         {
+            isForceSync = true;
             return;
         }
         var rb = GetRigidbody2D();
@@ -270,7 +297,7 @@ public class KyoukoManager
         {
             return;
         }
-        
-        rb.position += new Vector2(114514, 114514);
+
+        rb.position = new Vector2(114514f, 114514f);
     }
 }

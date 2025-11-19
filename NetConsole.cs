@@ -285,6 +285,11 @@ public class NetConsole
                 var mystiaMoving = MystiaManager.Instance.GetMoving();
                 SendToClient(client, $"Mystia Moving: {mystiaMoving}\n");
                 break;
+            
+            case "mystia movespeed":
+                var mystiaMoveSpeed = MystiaManager.Instance.GetMoveSpeed();
+                SendToClient(client, $"Mystia Move Speed: {mystiaMoveSpeed}\n");
+                break;
 
             case "mystia inputdirection":
                 var mystiaInputDir = MystiaManager.Instance.GetInputDirection();
