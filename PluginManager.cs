@@ -10,10 +10,10 @@ public class PluginManager : MonoBehaviour
 {
     public static PluginManager Instance { get; private set; }
     public static ManualLogSource Log => Plugin.Instance.Log;
+    public static InGameConsole Console { get; private set; }
 
     private bool isTextVisible = true;
     private string label = "MetaMystia loaded";
-    private NetConsole netConsole;
 
     public PluginManager(IntPtr ptr) : base(ptr)
     {
@@ -32,14 +32,15 @@ public class PluginManager : MonoBehaviour
 
     private void Awake()
     {
-        netConsole = new NetConsole();
-        netConsole.Start();
+        Console = new InGameConsole();
 
         // MultiplayerManager.Instance.Start();
     }
 
     private void OnGUI()
     {
+        if (Console != null) Console.OnGUI();
+
         if (isTextVisible)
         {
             var info = new System.Text.StringBuilder();
@@ -51,12 +52,11 @@ public class PluginManager : MonoBehaviour
 
     private void Update()
     {
+        if (Console != null) Console.Update();
+
         if (Input.GetKeyDown(KeyCode.Backslash)) {
             isTextVisible = !isTextVisible;
             Log.LogMessage("Toggled text visibility: " + isTextVisible);
-        }
-        if (Input.GetKeyDown(KeyCode.Slash) && Input.GetKey(KeyCode.LeftControl)) {
-            MultiplayerManager.Instance.ToggleRunning();
         }
     }
 
@@ -67,9 +67,5 @@ public class PluginManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (netConsole != null)
-        {
-            netConsole.Stop();
-        }
     }
 }
