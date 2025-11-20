@@ -18,8 +18,13 @@ public class CharacterInputPatch
     // 问题复现: Mystia 顶着墙移动，对方眼中，Kyouko 穿墙飞走
     [HarmonyPatch(nameof(CharacterControllerInputGeneratorComponent.UpdateInputDirection))]
     [HarmonyPrefix]
-    public static void UpdateInputDirection_Prefix(CharacterControllerInputGeneratorComponent __instance, Vector2 inputDirection)
+    public static void UpdateInputDirection_Prefix(CharacterControllerInputGeneratorComponent __instance, ref Vector2 inputDirection)
     {
+        if (PluginManager.Console != null && PluginManager.Console.IsOpen)
+        {
+            inputDirection = Vector2.zero;
+        }
+
         try
         {
             var playerInputGenerator = MystiaManager.Instance.GetInputGenerator();
@@ -42,9 +47,11 @@ public class DayScenePlayerInputPatch
 
     [HarmonyPatch(nameof(DayScenePlayerInputGenerator.OnSprintPerformed))]
     [HarmonyPrefix]
-    public static void OnSprintPerformed_Prefix()
+    public static bool OnSprintPerformed_Prefix()
     {
+        if (PluginManager.Console != null && PluginManager.Console.IsOpen) return false;
         MultiplayerManager.Instance.SendSprintData(true);
+        return true;
     }
 
     [HarmonyPatch(nameof(DayScenePlayerInputGenerator.OnSprintCanceled))]
@@ -52,6 +59,14 @@ public class DayScenePlayerInputPatch
     public static void OnSprintCanceled_Prefix()
     {
         MultiplayerManager.Instance.SendSprintData(false);
+    }
+
+    [HarmonyPatch(nameof(DayScenePlayerInputGenerator.TryInteract))]
+    [HarmonyPrefix]
+    public static bool TryInteract_Prefix()
+    {
+        if (PluginManager.Console != null && PluginManager.Console.IsOpen) return false;
+        return true;
     }
 }
 
