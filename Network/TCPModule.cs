@@ -97,6 +97,9 @@ public class PacketBuffer
 [AutoLog]
 public sealed partial class TcpServer : IDisposable
 {
+    public event System.Action<string> ClientConnected;
+    public event System.Action ClientDisconnected;
+    public event System.Action<NetPacket> PacketReceived;
 
     private readonly TcpListener listener;
     private TcpClient currentClient;
@@ -104,7 +107,6 @@ public sealed partial class TcpServer : IDisposable
     private readonly object lockObj = new();
 
     private volatile bool running;
-    private Thread heartbeatThread;
 
     private const int HeartbeatLoopInterval = 3000;
     private const int BufferLen = 4096;
@@ -213,9 +215,9 @@ public sealed partial class TcpServer : IDisposable
         }
 
         Log.LogMessage("[S] Client connected.");
-        MpManager.OnConnected(GetRealConnectedIp);
+        ClientConnected?.Invoke(GetRealConnectedIp);
+        // MpManager.OnConnected(GetRealConnectedIp);  // TODO(Hz6826)
 
-        StartHeartbeat();
         StartReceiveLoop(client);
 
         BeginAccept();
@@ -245,10 +247,7 @@ public sealed partial class TcpServer : IDisposable
 
                     foreach (var packet in buffer.ExtractPackets())
                     {
-                        foreach (var action in packet.Actions)
-                        {
-                            MpManager.OnAction(action);
-                        }
+                        PacketReceived?.Invoke(packet);
                     }
                 }
             }
@@ -264,49 +263,50 @@ public sealed partial class TcpServer : IDisposable
         });
     }
 
-    // =========================
-    // 心跳
-    // =========================
-
-    private void StartHeartbeat()
-    {
-        heartbeatThread = new Thread(() =>
-        {
-            while (true)
-            {
-                TcpClient client;
-
-                lock (lockObj)
-                {
-                    if (!running)
-                        break;
-
-                    client = currentClient;
-                }
-
-                if (client == null)
-                    break;
-
-                try
-                {
-                    MpManager.SendPing();
-                }
-                catch
-                {
-                    // SendPing 内部失败会由接收线程清理
-                }
-
-                Thread.Sleep(HeartbeatLoopInterval);
-            }
-
-            Log.LogMessage("[S] Heartbeat thread terminated.");
-        })
-        {
-            IsBackground = true
-        };
-
-        heartbeatThread.Start();
-    }
+    // TODO(Hz6826)
+    // // =========================
+    // // 心跳
+    // // =========================
+    //
+    // private void StartHeartbeat()
+    // {
+    //     heartbeatThread = new Thread(() =>
+    //     {
+    //         while (true)
+    //         {
+    //             TcpClient client;
+    //
+    //             lock (lockObj)
+    //             {
+    //                 if (!running)
+    //                     break;
+    //
+    //                 client = currentClient;
+    //             }
+    //
+    //             if (client == null)
+    //                 break;
+    //
+    //             try
+    //             {
+    //                 MpManager.SendPing();
+    //             }
+    //             catch
+    //             {
+    //                 // SendPing 内部失败会由接收线程清理
+    //             }
+    //
+    //             Thread.Sleep(HeartbeatLoopInterval);
+    //         }
+    //
+    //         Log.LogMessage("[S] Heartbeat thread terminated.");
+    //     })
+    //     {
+    //         IsBackground = true
+    //     };
+    //
+    //     heartbeatThread.Start();
+    // }
 
     // =========================
     // 发送
@@ -364,7 +364,8 @@ public sealed partial class TcpServer : IDisposable
         if (shouldNotify)
         {
             Log.LogMessage("[S] Client disconnected.");
-            MpManager.OnDisconnected();
+            ClientDisconnected?.Invoke();
+            // MpManager.OnDisconnected();  // TODO(Hz6826)
         }
     }
 
@@ -382,7 +383,8 @@ public sealed partial class TcpServer : IDisposable
         {
             try { client.Close(); } catch { }
             Log.LogMessage("[S] Client disconnected.");
-            MpManager.OnDisconnected();
+            ClientDisconnected?.Invoke();
+            // MpManager.OnDisconnected();  // TODO(Hz6826)
         }
     }
 
@@ -439,6 +441,10 @@ public sealed partial class TcpServer : IDisposable
 [AutoLog]
 public sealed partial class TcpClientWrapper : IDisposable
 {
+    public event Action<string> Connected;
+    public event System.Action Disconnected;
+    public event Action<NetPacket> PacketReceived;
+
     private readonly string host;
     private readonly int port;
 
@@ -447,7 +453,6 @@ public sealed partial class TcpClientWrapper : IDisposable
     private PacketBuffer buffer = new PacketBuffer();
 
     private Task receiveTask;
-    private Task heartbeatTask;
 
     private CancellationTokenSource cts;
     private readonly object sendLock = new();
@@ -515,10 +520,10 @@ public sealed partial class TcpClientWrapper : IDisposable
             var loopToken = cts.Token;
 
             receiveTask = Task.Run(() => ReceiveLoopAsync(loopToken), loopToken);
-            heartbeatTask = Task.Run(() => HeartbeatLoopAsync(loopToken), loopToken);
 
             Volatile.Write(ref connected, 1);
             Log.LogMessage("[C] Connected.");
+            Connected?.Invoke(host);
         }
         catch
         {
@@ -537,7 +542,7 @@ public sealed partial class TcpClientWrapper : IDisposable
 
         CloseInternal(resetClosedFlag: false);
 
-        MpManager.OnDisconnected();
+        Disconnected?.Invoke();
         Log.LogWarning("[C] Disconnected. Reconnecting...");
         try
         {
@@ -571,10 +576,7 @@ public sealed partial class TcpClientWrapper : IDisposable
                 var packets = buffer.ExtractPackets();
                 foreach (var packet in packets)
                 {
-                    foreach (var action in packet.Actions)
-                    {
-                        MpManager.OnAction(action);
-                    }
+                    PacketReceived?.Invoke(packet);
                 }
             }
         }
@@ -593,38 +595,39 @@ public sealed partial class TcpClientWrapper : IDisposable
         }
     }
 
-    // =========================
-    // 心跳循环
-    // =========================
-
-    private async Task HeartbeatLoopAsync(CancellationToken token)
-    {
-        try
-        {
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
-                    MpManager.SendPing();
-                }
-                catch (Exception ex)
-                {
-                    Log.LogWarning($"[C] Heartbeat failed: {ex.Message}");
-                    await ScheduleReconnectAsync();
-                    return;
-                }
-
-                await Task.Delay(HeartbeatIntervalMs, token);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        finally
-        {
-            Log.LogWarning("[C] HeartbeatLoop terminated.");
-        }
-    }
+    // TODO(Hz6826)
+    // // =========================
+    // // 心跳循环
+    // // =========================
+    //
+    // private async Task HeartbeatLoopAsync(CancellationToken token)
+    // {
+    //     try
+    //     {
+    //         while (!token.IsCancellationRequested)
+    //         {
+    //             try
+    //             {
+    //                 MpManager.SendPing();
+    //             }
+    //             catch (Exception ex)
+    //             {
+    //                 Log.LogWarning($"[C] Heartbeat failed: {ex.Message}");
+    //                 await ScheduleReconnectAsync();
+    //                 return;
+    //             }
+    //
+    //             await Task.Delay(HeartbeatIntervalMs, token);
+    //         }
+    //     }
+    //     catch (OperationCanceledException)
+    //     {
+    //     }
+    //     finally
+    //     {
+    //         Log.LogWarning("[C] HeartbeatLoop terminated.");
+    //     }
+    // }
 
     // =========================
     // 发送
@@ -660,7 +663,7 @@ public sealed partial class TcpClientWrapper : IDisposable
             return;
 
         CloseInternal(resetClosedFlag: false);
-        MpManager.OnDisconnected();
+        Disconnected?.Invoke();
         Log.LogMessage("[C] Closed.");
     }
 

@@ -36,6 +36,8 @@ public enum ActionType : ushort
     BUFF,
     IZAKAYA_CLOSE,
     GET_COLLECTABLE,
+    CHANGE_HOST_ROLE,
+    INQUIRY
 }
 
 [MemoryPackable]
@@ -67,10 +69,13 @@ public enum ActionType : ushort
 [MemoryPackUnion((ushort)ActionType.BUFF, typeof(BuffAction))]
 [MemoryPackUnion((ushort)ActionType.IZAKAYA_CLOSE, typeof(IzakayaCloseAction))]
 [MemoryPackUnion((ushort)ActionType.GET_COLLECTABLE, typeof(GetCollectableAction))]
+[MemoryPackUnion((ushort)ActionType.CHANGE_HOST_ROLE, typeof(ChangeHostRoleAction))]
 [AutoLog]
 
 public abstract partial class Action
 {
+    [MemoryPackIgnore] public static long SenderId2 = new Random().NextInt64();
+
     public abstract ActionType Type { get; }
     public long TimestampMs { get; protected set; }
     public long SenderId { get; protected set; }
@@ -99,7 +104,7 @@ public abstract partial class Action
     protected Action()
     {
         TimestampMs = MpManager.TimestampNow;
-        SenderId = 0;
+        SenderId = SenderId2;
     }
 
 

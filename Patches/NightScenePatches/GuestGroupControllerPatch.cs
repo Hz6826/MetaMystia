@@ -15,7 +15,7 @@ public partial class GuestGroupControllerPatch
     {
         if (__instance == null) return;
         if (MpManager.ShouldSkipAction) return;
-        if (MpManager.IsHost && generatedOrder != null)
+        if (MpManager.IsNetworkServer && generatedOrder != null)
         {
             var uuid = __instance.GetGuestUUID();
             if (uuid == null) return;

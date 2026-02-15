@@ -14,6 +14,8 @@ using SgrYuki.Utils;
 using static SgrYuki.Utils.ContainerExtensions;
 using UnityEngine;
 using Il2CppSystem.Dynamic.Utils;
+using MetaMystia.Network;
+using Action = System.Action;
 
 namespace MetaMystia;
 
@@ -65,6 +67,15 @@ public partial class PluginManager : MonoBehaviour
             intervalSeconds: ChangePluginNameCommandInterval,
             execute: () => PluginName = PluginNames.GetRandomOne()
         );
+        try
+        {
+            var networkProvider = new TcpNetworkProvider();
+            MpManager.Initialize(networkProvider);
+        }
+        catch (Exception e)
+        {
+            Log.LogError($"Failed to initialize network provider: {e.Message}");
+        }
     }
 
     private void OnGUI()

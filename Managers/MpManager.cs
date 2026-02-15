@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MetaMystia.Network;
 using SgrYuki;
@@ -24,34 +26,43 @@ public static partial class MpManager
     private const string SyncActionCommandID = "SyncAction";
     #endregion
 
+    private static INetworkProvider _network;
+
     #region Multiplayer Related Values
     public static string PlayerId { get; set { field = value; Log.Info($"Player ID set to: {value}"); } } = Environment.MachineName;
-    public static string PeerAddress { get; set; }
+    public static string PeerAddress => _network?.PeerAddress ?? "<Unknown>";
     public static string PeerId { get; set; }
     public static long Latency { get; private set; } = 0;
 
     public static int ConnectedPlayersCount => IsConnected ? 1 : 0;
-    public static int AllPlayersCount => ConnectedPlayersCount + 1;
+    public static int AllPlayersCount => ConnectedPlayersCount + 1;  // TODO
     #endregion
 
-    private static TcpServer server = null;
-    private static TcpClientWrapper client = null;
-    private static ROLE Role;
+    #region Networking
     public static bool IsRunning { get; private set; }
-    public static bool IsHost => Role == ROLE.Host;
-    public static bool IsClient => Role == ROLE.Client;
+    public static bool IsNetworkServer => _network?.IsServer ?? false;
+    public static bool IsNetworkClient => !IsNetworkServer;
+
     private static bool IsConnecting = false;
-    public static bool IsConnected => (IsHost ? server?.HasAliveClient : client?.IsConnected) ?? false;
-    public static bool IsConnectedClient => IsConnected && IsClient;
+    public static bool IsConnected => _network?.IsConnected ?? false;
+    public static bool IsConnectedNetworkClient => IsConnected && IsNetworkClient;
+    public static bool IsConnectedNetworkServer => IsConnected && IsNetworkServer;
+    public static string RoleTag => IsNetworkServer ? "[S]" : "[C]";
+    public static string RoleName => IsNetworkServer ? "Host" : "Client";
+    #endregion
+
+    #region Game Logic
+    public static bool IsHost { get; set; }  // 游戏的逻辑主机标识，如数据生成依照该标识
     public static bool IsConnectedHost => IsConnected && IsHost;
-    public static string RoleTag => IsHost ? "[S]" : "[C]";
-    public static string RoleName => IsHost ? "Host" : "Client";
+    public static bool IsConnectedClient => IsConnected && !IsHost;
+    #endregion
 
     private static ConcurrentDictionary<int, long> pingSendTimes = new();
+    private static int pingSendTimeMaxLength = 100;  // 以防peer始终不回应导致内存泄漏
     public static long TimestampNow => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    public static long TimeOffset = 0;
+    public static long TimeOffset = 0L;
     public static long GetSynchronizedTimestampNow => TimestampNow - TimeOffset;
-    private static int _pingId = 0;
+    private static volatile int _pingId = 0;  // pingSendTimes都用Concurrent了，这个也要
 
     #region SinglePlay GamePlay Getters
     public static Common.UI.Scene LocalScene { get; private set; } = Common.UI.Scene.EmptyScene;
@@ -97,24 +108,46 @@ public static partial class MpManager
 
     #endregion
 
+    public static void Initialize(INetworkProvider networkProvider)
+    {
+        if (_network != null)
+        {
+            _network.Connected -= OnNetworkConnected;
+            _network.Disconnected -= OnNetworkDisconnected;
+            _network.PacketReceived -= OnNetworkPacketReceived;
+        }
+        _network = networkProvider;
+        _network.Connected += OnNetworkConnected;
+        _network.Disconnected += OnNetworkDisconnected;
+        _network.PacketReceived += OnNetworkPacketReceived;
+    }
+
     public static void SwitchRole(bool stop_existed_server = true)
     {
-        Log.Message($"Switching role from {Role} to {(IsHost ? "Client" : "Host")}");
-        if (IsHost)
+        if (!IsRunning)
         {
-            if (stop_existed_server)
-            {
-                server?.Stop();
-                server = null;
-            }
-            Role = ROLE.Client;
+            Log.LogWarning("MpManager is not running.");
+            return;
+        }
+        if (_network == null)
+        {
+            Log.LogError("Network provider not set.");
+            return;
+        }
+
+        Log.Message($"Switching role to {(IsNetworkServer ? "Client" : "Host")}");
+        if (IsNetworkServer)
+        {
+            if (IsConnected && !stop_existed_server) return; // 已连接且未要求stop_existed_server
+            _network.Stop();
+            Log.Message("Switched to client mode. Use ConnectToPeerAsync to connect.");
         }
         else
         {
-            client?.Close();
-            server = new(TCP_PORT);
-            server.Start();
-            Role = ROLE.Host;
+            // 当前是客户端 -> 切换为主机
+            _network.Stop(); // 确保客户端停止
+            _network.StartHost(TCP_PORT);
+            Log.Message("Switched to host mode. Server started.");
         }
     }
 
@@ -133,21 +166,21 @@ public static partial class MpManager
             return true;
         }
 
+        if (_network == null)
+        {
+            Log.LogError("Network provider not set. Call SetNetworkProvider first.");
+            return false;
+        }
+
         IsRunning = true;
         PeerId = "<Unknown>";
-        Role = r;
         Log.Info(DumpDebugText());
-        switch (r)
+        if (r == ROLE.Host)
         {
-            case ROLE.Host:
-                server = new(TCP_PORT);
-                server.Start();
-                Log.LogInfo("Starting MpManager as host");
-                break;
-            case ROLE.Client:
-                Log.LogInfo("Starting MpManager as client");
-                break;
+            _network.StartHost(TCP_PORT);
+            Log.LogInfo("Starting MpManager as host");  // 客户端模式由ConnectToPeerAsync负责
         }
+
         return true;
     }
 
@@ -161,10 +194,7 @@ public static partial class MpManager
 
         try
         {
-            server?.Stop();
-            server = null;
-            client?.Close();
-            client = null;
+            _network.Stop();
         }
         catch (Exception e)
         {
@@ -183,7 +213,7 @@ public static partial class MpManager
     public static bool Restart()
     {
         Stop();
-        return Start(Role);
+        return Start(IsNetworkServer? ROLE.Host : ROLE.Client);
     }
 
     public static async Task<bool> ConnectToPeerAsync(string peerIp, int port = TCP_PORT, bool stop_existed_server = true)
@@ -208,15 +238,14 @@ public static partial class MpManager
         try
         {
             IsConnecting = true;
-            if (IsHost)
+            if (IsNetworkServer)
             {
                 SwitchRole(stop_existed_server);
             }
             PluginManager.Console.LogToConsole(TextId.MpConnecting.Get(peerIp, port));
             Log.LogInfo($"[C] Connecting to {peerIp}:{port}...");
-            client = new(peerIp, port);
-            await client.StartAsync();
-            OnConnected(client.GetRealConnectedIp);
+            await _network.ConnectAsClientAsync(peerIp, port);  // OnConnect会有事件触发
+            if (!_network.IsConnected) throw new Exception("Could not connect to peer");
             Log.LogMessage($"[C] Successfully connected to peer {peerIp}:{port}");
 
             return true;
@@ -232,12 +261,18 @@ public static partial class MpManager
         }
     }
 
-    public static void OnConnected(string ip)
+    private static void OnNetworkConnected(string address)
+    {
+        // 可以直接访问PeerAddress，留着返回address只是为了兼容性
+        OnConnected();
+    }
+
+    private static void OnConnected()
     {
         // PeerAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
-        PeerAddress = ip;
         HelloAction.Send();
         SceneTransitAction.Send(LocalScene);
+        IsHost = IsNetworkServer;  // 初始化时与NetworkServer一致
         CommandScheduler.EnqueueInterval(SyncActionCommandID, 0.5f, SyncAction.Send);
         CommandScheduler.EnqueueKey(
             key: PeerGetCharacterUnitNotNullCommand,
@@ -252,15 +287,21 @@ public static partial class MpManager
             },
             timeoutSeconds: 120
         );
+        CommandScheduler.EnqueueInterval("MpPing", 3f, SendPing);  // 将心跳定时器移到了这里
         Notify.ShowOnMainThread($"联机系统：已连接！");
     }
 
-
-    public static void OnDisconnected()
+    private static void OnNetworkDisconnected()
     {
-        PeerAddress = "<Unknown>";
+        OnDisconnected();
+    }
+
+
+    private static void OnDisconnected()
+    {
         PeerId = "<Unknown>";
         DLCManager.ClearPeer();
+        IsHost = false;
         CommandScheduler.EnqueueWithNoCondition(() =>
         {
             if (PeerManager.GetCharacterUnit() != null)
@@ -271,52 +312,33 @@ public static partial class MpManager
         });
         CommandScheduler.RemoveKeyFromKeyQueue(PeerGetCharacterUnitNotNullCommand);
         CommandScheduler.CancelInterval(SyncActionCommandID);
+        CommandScheduler.CancelInterval("MpPing");
         Notify.ShowOnMainThread($"联机系统：连接已断开！");
     }
 
-    public static void OnAction(Network.Action action)
+    private static void OnNetworkPacketReceived(NetPacket packet)
     {
-        action.OnReceived();
+        foreach (var action in packet.Actions)
+        {
+            action?.OnReceived();
+        }
     }
 
     public static void SendToHostOrBroadcast(NetPacket packet)
     {
-        if (IsHost)
-        {
-            server?.Send(packet);
-        }
-        else
-        {
-            client?.Send(packet);
-        }
+        _network?.Send(packet);
     }
 
     public static void SendToPeer(NetPacket packet)
     {
-        if (IsHost)
-        {
-            server?.Send(packet);
-        }
-        else
-        {
-            client?.Send(packet);
-        }
+        _network?.Send(packet);
     }
 
     public static void DisconnectPeer()
     {
-        if (IsConnected)
-        {
-            if (IsHost)
-            {
-                server.DisconnectClient();
-            }
-            else
-            {
-                client.Close();
-            }
-            Log.LogMessage("Peer connection disconnected");
-        }
+        if (!IsConnected) return;
+        _network?.Disconnect();
+        Log.LogMessage("Peer connection disconnected");
     }
 
     /// <summary>
@@ -327,8 +349,14 @@ public static partial class MpManager
     public static void SendPing()
     {
         if (!IsConnected) return;
+        if (pingSendTimes.Count >= pingSendTimeMaxLength)
+        {
+            // 移除最旧的 Ping 记录（键最小，即最早发送的 Ping）
+            var oldestKey = pingSendTimes.Keys.Min();
+            pingSendTimes.TryRemove(oldestKey, out _);
+        }
         var t = TimestampNow;
-        int id = _pingId++;
+        int id = Interlocked.Increment(ref _pingId);
         pingSendTimes[id] = t;
         PingAction.SendToPeer(0, id);
     }
@@ -346,12 +374,12 @@ public static partial class MpManager
         status.AppendLine($"Local Port: {TCP_PORT}");
         status.AppendLine($"Running: {(IsRunning ? "Yes" : "No")}");
         status.AppendLine($"Connected: {(IsConnected ? "Yes" : "No")}");
-        if (IsConnected)
-        {
-            status.AppendLine($"Kyouko ID: {PeerId}");
-            status.AppendLine($"Kyouko Address: {PeerAddress ?? "<Unknown>"}");
-            status.AppendLine($"Latency: {Latency} ms");
-        }
+        if (!IsConnected) return status.ToString();
+        status.AppendLine($"Kyouko ID: {PeerId}");
+        status.AppendLine($"Kyouko Address: {PeerAddress ?? "<Unknown>"}");
+        status.AppendLine($"Latency: {Latency} ms");
+        status.AppendLine("");
+        status.AppendLine($"Is Logic Host: {(IsHost ? "Yes" : "No")}");
 
         return status.ToString();
     }
@@ -368,7 +396,7 @@ public static partial class MpManager
         }
         if (IsConnected)
         {
-            return $"Multiplayer: {RoleTag} Connected to {PeerId} ({PeerAddress}), ping: {Latency} ms";
+            return $"Multiplayer: {RoleTag} Connected to {PeerId} ({PeerAddress}), ping: {Latency} ms {(IsHost?"[Logic Host]":"")}";
         }
         else
         {
@@ -404,7 +432,15 @@ public static partial class MpManager
         Log.Message($"{PeerId} dayover");
         if (PeerManager.IsDayOver && MystiaManager.IsDayOver)
         {
-            ReadyAction.Broadcast(ReadyType.DayOver);
+            if (IsConnectedNetworkServer)
+            {
+                ReadyAction.Broadcast(ReadyType.DayOver);
+            }
+            else
+            {
+                ReadyAction.Send(ReadyType.DayOver);  // 仅为逻辑主机时服务器接管all ready状态
+            }
+
 
             // For host who will not receive DayOver allready
             CommandScheduler.EnqueueWithNoCondition(() => Dialog.ShowReadyDialog(true, DaySceneManagerPatch.OnDayOver));
@@ -418,7 +454,14 @@ public static partial class MpManager
 
         if (PeerManager.IsPrepOver && MystiaManager.IsPrepOver)
         {
-            ReadyAction.Broadcast(ReadyType.PrepOver);
+            if (IsConnectedNetworkServer)
+            {
+                ReadyAction.Broadcast(ReadyType.PrepOver);
+            }
+            else
+            {
+                ReadyAction.Send(ReadyType.PrepOver);  // 仅为逻辑主机时服务器接管all ready状态
+            }
 
             // For host who will not receive PrepOver allready
             CommandScheduler.EnqueueWithNoCondition(IzakayaConfigPannelPatch.PrepOver);

@@ -73,7 +73,7 @@ public static partial class MinHook_SpawnNormalGuestGroup
             return IntPtr.Zero;
         }
 
-        if (MpManager.ShouldSkipAction || MpManager.IsClient) return res;
+        if (MpManager.ShouldSkipAction || MpManager.IsNetworkClient) return res;
 
         var guestGroupControllerCvt = new GuestGroupController(res);
         // var normalGuestsCvt = new Il2CppSystem.Collections.Generic.IEnumerable<NormalGuest>(normalGuests);

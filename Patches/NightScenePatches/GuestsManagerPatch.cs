@@ -95,7 +95,7 @@ public partial class GuestsManagerPatch
     public static bool SpawnNormalGuestGroup_Prefix()
     {
         if (MpManager.ShouldSkipAction) return true;
-        if (MpManager.IsClient) return false;
+        if (MpManager.IsNetworkClient) return false;
 
         var cook = NightScene.CookingUtility.CookSystemManager.Instance;
         while (true)
@@ -223,7 +223,7 @@ public partial class GuestsManagerPatch
         bool IsReimuSpellCardTriggered = Functional.CheckStacktraceContains("InitializeAsGeneralWorkScene");
         if (IsReimuSpellCardTriggered) return true;
 
-        if (MpManager.IsClient) return false;
+        if (MpManager.IsNetworkClient) return false;
 
         if (!DLCManager.PeerSpecialGuestAvailable(id))
         {
@@ -272,7 +272,7 @@ public partial class GuestsManagerPatch
     {
         if (!MpManager.ShouldSkipAction)
         {
-            if (MpManager.IsClient)
+            if (MpManager.IsNetworkClient)
             {
                 Log.LogDebug($"TrySendToSeat prevented");
                 return false;
@@ -343,7 +343,7 @@ public partial class GuestsManagerPatch
             return false;
         }
 
-        if (MpManager.IsClient)
+        if (MpManager.IsNetworkClient)
         {
             return WorkSceneManager.CheckStatus(uuid, WorkSceneManager.Status.Left);
         }
@@ -377,7 +377,7 @@ public partial class GuestsManagerPatch
             if (uuid == null) return true;
 
             Log.InfoCaller($"{uuid.GetGuestFSM()?.Identifier}");
-            if (MpManager.IsClient)
+            if (MpManager.IsNetworkClient)
             {
                 return WorkSceneManager.CheckStatus(uuid, WorkSceneManager.Status.Left);
             }
@@ -407,7 +407,7 @@ public partial class GuestsManagerPatch
             if (uuid == null) return true;
 
             Log.InfoCaller($"{uuid.GetGuestFSM()?.Identifier}");
-            if (MpManager.IsClient)
+            if (MpManager.IsNetworkClient)
             {
                 return WorkSceneManager.CheckStatus(uuid, WorkSceneManager.Status.Left);
             }
@@ -521,7 +521,7 @@ public partial class GuestsManagerPatch
             var uuid = toPatientDepletedLeave.GetGuestUUID();
             if (uuid == null) return true;
 
-            if (MpManager.IsClient)
+            if (MpManager.IsNetworkClient)
             {
                 Log.DebugCaller($"{uuid.GetGuestFSM()?.Identifier}");
                 return WorkSceneManager.CheckStatus(uuid, WorkSceneManager.Status.Left);
@@ -556,7 +556,7 @@ public partial class GuestsManagerPatch
         if (uuid == null) return true;
         var fsm = WorkSceneManager.GetGuestFSM(uuid);
 
-        if (MpManager.IsHost)
+        if (MpManager.IsNetworkServer)
         {
             // NightScene_GuestManagementUtility_GuestsManager__GenerateOrderSession
             // Stacktrace: GenerateOrderSession -> GuestPay(here) -> LeaveFromDesk
@@ -628,7 +628,7 @@ public partial class GuestsManagerPatch
         var fsm = uuid.GetGuestFSM();
         fsm?.TryPendingOrder();
 
-        if (MpManager.IsClient)
+        if (MpManager.IsNetworkClient)
         {
             Log.InfoCaller($"prevented for {fsm?.Identifier}");
             return false;
