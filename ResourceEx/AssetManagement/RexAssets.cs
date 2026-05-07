@@ -168,7 +168,11 @@ public sealed class RexBinaryAsset : RexAsset
 [AutoLog]
 public static partial class RexAssetRegistry
 {
-    private static readonly Dictionary<string, RexAsset> _assets = new(StringComparer.OrdinalIgnoreCase);
+    // Case-sensitive: rex:// URIs follow RFC 3986 path semantics. The scheme prefix itself
+    // is matched case-insensitively in RexUri.IsRexUri (per RFC 3986), but package name and
+    // path are exact-match. This stays in lockstep with RuntimeAddressables.KeyToGuid (MD5),
+    // which is byte-sensitive — so a single source of truth across both registries.
+    private static readonly Dictionary<string, RexAsset> _assets = new(StringComparer.Ordinal);
 
     private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
