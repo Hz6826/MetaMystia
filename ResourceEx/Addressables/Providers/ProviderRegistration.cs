@@ -14,6 +14,9 @@ public sealed class ProviderRegistration
     /// <summary>The Unity asset type this provider serves (e.g. <c>typeof(Sprite)</c>).</summary>
     public Type AssetType { get; init; }
 
+    /// <summary>The IL2CPP resource type stamped onto each <c>ResourceLocationBase</c>.</summary>
+    public Il2CppSystem.Type ResourceType { get; init; }
+
     /// <summary>Insert / overwrite an asset in the provider's internal store.</summary>
     public Action<string, UnityEngine.Object> AddAsset { get; init; }
 

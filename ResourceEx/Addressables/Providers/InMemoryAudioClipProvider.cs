@@ -28,6 +28,8 @@ public class InMemoryAudioClipProvider : ResourceProviderBase
         m_ProviderId = ProviderIdConst;
     }
 
+    public override string ProviderId => ProviderIdConst;
+
     public override Il2CppSystem.Type GetDefaultType(IResourceLocation location)
         => Il2CppType.Of<AudioClip>();
 

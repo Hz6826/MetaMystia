@@ -225,6 +225,7 @@ public static class RuntimeAddressables
         {
             ProviderId = providerId,
             AssetType = typeof(T),
+            ResourceType = Il2CppType.From(typeof(T)),
             AddAsset = (guid, obj) => addAsset(guid, (T)obj),
             GetAsset = getAsset == null ? (_ => null) : (guid => getAsset(guid)),
             RemoveAsset = removeAsset ?? (_ => false),
@@ -296,6 +297,7 @@ public static class RuntimeAddressables
         {
             ProviderId = InMemorySpriteProvider.ProviderIdConst,
             AssetType = typeof(Sprite),
+            ResourceType = Il2CppType.Of<Sprite>(),
             AddAsset = (guid, obj) => InMemorySpriteProvider.AddAsset(guid, (Sprite)obj),
             GetAsset = guid => InMemorySpriteProvider.GetAsset(guid),
             RemoveAsset = InMemorySpriteProvider.RemoveAsset,
@@ -315,6 +317,7 @@ public static class RuntimeAddressables
         {
             ProviderId = InMemoryAudioClipProvider.ProviderIdConst,
             AssetType = typeof(AudioClip),
+            ResourceType = Il2CppType.Of<AudioClip>(),
             AddAsset = (guid, obj) => InMemoryAudioClipProvider.AddAsset(guid, (AudioClip)obj),
             GetAsset = guid => InMemoryAudioClipProvider.GetAsset(guid),
             RemoveAsset = InMemoryAudioClipProvider.RemoveAsset,
@@ -342,7 +345,7 @@ public static class RuntimeAddressables
             guid,
             guid,
             reg.ProviderId,
-            Il2CppType.From(reg.AssetType),
+            reg.ResourceType,
             new Il2CppReferenceArray<IResourceLocation>(0)
         );
 
