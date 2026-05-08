@@ -56,7 +56,8 @@ public static partial class PatchRegistry
         typeof(DaySceneMapProfilePatch),
         typeof(DialogPannelPatch),
         typeof(DataBaseSchedulerPatch),
-        typeof(RunTimeDayScenePatch)
+        typeof(RunTimeDayScenePatch),
+        typeof(DaySceneChatSelectionPannel__c__DisplayClass17_0Patch),
     ];
 
     public static bool AllPatched => PatchedException == null;

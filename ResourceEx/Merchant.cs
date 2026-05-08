@@ -19,6 +19,9 @@ namespace MetaMystia;
 
 public static partial class ResourceExManager
 {
+    public static bool IsResourceExSpecialMerchant(this string stringId, string type = "Special") =>
+        stringId.IsResourceExSpecialGuest() && _builtMerchants.ContainsKey(stringId);
+
     /// <summary>
     /// Removes orphaned tracked merchant entries from RunTimeDayScene.trackedMerchants
     /// that no longer have a corresponding merchant definition in either the base game
