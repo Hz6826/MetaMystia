@@ -65,11 +65,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Assembly-CSharp\**" />
-    <EmbeddedResource Remove="Assembly-CSharp\**" />
-    <None Remove="Assembly-CSharp\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="MystiaReverse\**" />
     <EmbeddedResource Remove="MystiaReverse\**" />
     <None Remove="MystiaReverse\**" />
