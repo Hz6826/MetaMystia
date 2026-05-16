@@ -139,4 +139,11 @@ public partial class IzakayaSelectorPanelPatch
 
         Log.Info($"OnGuideMapSpotSelected called, guideMapSpot.PrimaryName: {guideMapSpot.PrimaryName}");
     }
+
+    [HarmonyPatch(nameof(Common.UI.IzakayaSelectorPanel_New.OnGuideMapSpotSelected))]
+    [HarmonyReversePatch]
+    public static void OnGuideMapSpotSelected_Original(Common.UI.IzakayaSelectorPanel_New __instance, Common.UI.GlobalMap.IGuideMapSpot guideMapSpot)
+    {
+        throw new System.NotImplementedException("It's a stub");
+    }
 }
