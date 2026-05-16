@@ -118,7 +118,7 @@ public abstract partial class Action
         var targetScene = GetReceivedScene();
         if (targetScene != null && MpManager.LocalScene != targetScene.Value)
         {
-            Log.Info($"{MpManager.RoleTag} Received in invalid scene: {Type}: {ToString()}");
+            Log.Info($"{MpManager.RoleTag} Received in invalid scene: {Type}: {ToLogString()}");
             return;
         }
         if (ShouldDiscardOnStory())
@@ -155,6 +155,11 @@ public abstract partial class Action
             });
     }
 
+    protected virtual string ToLogString()
+    {
+        return ToString();
+    }
+
     private static void LogAction(LogLevel logLevel, string logStr)
     {
         switch (logLevel)
@@ -182,13 +187,13 @@ public abstract partial class Action
 
     protected void LogActionReceived()
     {
-        string logStr = $"{MpManager.RoleTag} Received {Type}{(OnReceiveLogOnlyAction ? "" : $": {ToString()}")}";
+        string logStr = $"{MpManager.RoleTag} Received {Type}{(OnReceiveLogOnlyAction ? "" : $": {ToLogString()}")}";
         LogAction(OnReceiveLogLevel, logStr);
     }
 
     protected void LogActionSend()
     {
-        string logStr = $"{MpManager.RoleTag} Send {Type}{(OnSendLogOnlyAction ? "" : $": {ToString()}")}";
+        string logStr = $"{MpManager.RoleTag} Send {Type}{(OnSendLogOnlyAction ? "" : $": {ToLogString()}")}";
         LogAction(OnSendLogLevel, logStr);
     }
 
