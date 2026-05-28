@@ -1,3 +1,5 @@
+using System;
+
 using HarmonyLib;
 
 using NightScene.EventUtility;
@@ -12,6 +14,19 @@ namespace MetaMystia.Patch;
 [AutoLog]
 public static partial class NightSceneEventManagerPatch
 {
+    public static readonly PatchBypassToken HostCloseReplay = new();
+    public static bool IsHostCloseReplay => HostCloseReplay.Pending > 0;
+
+    [HarmonyPatch(nameof(EventManager.Initialize))]
+    [HarmonyPostfix]
+    public static void Initialize_Postfix(EventManager __instance)
+    {
+        if (!MpManager.IsConnected) return;
+
+        Func<int> getWholeNightTime = () => MpManager.WorkTimeSecondOverride;
+        __instance.GetWholeNightTime = getWholeNightTime;
+    }
+
     [HarmonyPatch(nameof(EventManager.Fever))]
     [HarmonyPrefix]
     public static void Fever_Prefix(EventManager __instance, int durationSec)
@@ -25,14 +40,31 @@ public static partial class NightSceneEventManagerPatch
 
     [HarmonyPatch(nameof(EventManager.StartGuestSpawningAndTiming))]
     [HarmonyPrefix]
-    public static void StartGuestSpawningAndTiming_Prefix(EventManager __instance, ref int gameTotalSeconds)
+    public static void StartGuestSpawningAndTiming_Prefix(ref int gameTotalSeconds)
     {
         if (MpManager.IsConnected)
         {
-            gameTotalSeconds = __instance.GetWholeNightTime.Invoke();
+            gameTotalSeconds = MpManager.WorkTimeSecondOverride;
             Log.InfoCaller($"gameTotalSeconds set to {gameTotalSeconds}s");
         }
     }
+
+    /// <summary>
+    /// 客机本地倒计时不能自行触发打烊，等待主机广播完整关闭路径。
+    /// </summary>
+    [HarmonyPatch(nameof(EventManager.ModifyTotalTime))]
+    [HarmonyPrefix]
+    public static bool ModifyTotalTime_Prefix(EventManager __instance, int time)
+    {
+        if (!MpManager.IsConnectedClient || IsHostCloseReplay || time >= 0) return RunOriginal;
+
+        var remaining = __instance.TotalCountDown + __instance.extraCountDown;
+        return remaining + time <= 0 ? SkipOriginal : RunOriginal;
+    }
+
+    [HarmonyPatch(nameof(EventManager.StopInstantiationLoopAndCloseIzakaya))]
+    [HarmonyReversePatch]
+    public static void StopInstantiationLoopAndCloseIzakaya_ReversePatch(EventManager __instance) { }
 
     [HarmonyPatch(nameof(EventManager.FundEdit))]
     [HarmonyPrefix]

@@ -2,7 +2,7 @@ using MemoryPack;
 
 using MetaMystia.Patch;
 using MetaMystia.UI;
-using NightScene.GuestManagementUtility;
+using NightScene.EventUtility;
 
 namespace MetaMystia.Network;
 
@@ -25,7 +25,16 @@ public partial class IzakayaCloseAction : Action
         {
             Log.Message($"Received close command from host");
             InGameConsole.ShowPassive(TextId.PeerClosedIzakaya.Get(PlayerManager.GetPeerName(SenderUid)));
-            GuestsManagerPatch.TryCloseIzakaya_ReversePatch(GuestsManager.Instance);
+            var eventManager = EventManager.Instance;
+            if (eventManager == null)
+            {
+                Log.Warning("EventManager is null when replaying host close.");
+                return;
+            }
+
+            NightSceneEventManagerPatch.HostCloseReplay.Grant();
+            NightSceneEventManagerPatch.StopInstantiationLoopAndCloseIzakaya_ReversePatch(eventManager);
+            NightSceneEventManagerPatch.HostCloseReplay.Reset();
         });
     }
 

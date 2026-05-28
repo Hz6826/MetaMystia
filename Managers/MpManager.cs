@@ -106,7 +106,7 @@ public static partial class MpManager
 
     public const string PeerGetCharacterUnitNotNullCommand = "PeerGetCharacterUnitNotNullCommand";
 
-    public static int WorkTimeSecondOverride = 9 * 60;
+    public static int WorkTimeSecondOverride = 9 * 6000;
 
     public static void SwitchRole(bool stop_existed_server = true)
     {

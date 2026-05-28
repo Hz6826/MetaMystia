@@ -591,6 +591,7 @@ public partial class GuestsManagerPatch
     public static bool TryCloseIzakaya_Prefix()
     {
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
+        if (NightSceneEventManagerPatch.IsHostCloseReplay) return RunOriginal;
         if (MpManager.IsConnectedHost)
         {
             IzakayaCloseAction.Broadcast();
