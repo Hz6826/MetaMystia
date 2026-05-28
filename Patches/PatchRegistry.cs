@@ -40,11 +40,17 @@ public static partial class PatchRegistry
         typeof(WorkSceneStoragePannelPatch),
         typeof(QTERewardManagerPatch),
         typeof(NightSceneEventManagerPatch),
+        typeof(WorkSceneSustainedPannelPatch),
         typeof(MystiaQTEBuffRewardPatch),
         typeof(GameTimeManagerPatch),
         typeof(WorkSceneCookingSelectionPannel__c__DisplayClass79_0Patch),
         typeof(UIManagerPatch),
+        typeof(GuestsManager__c__DisplayClass174_0Patch),
+        typeof(SpecialGuestsControllerPatch),
+        typeof(NormalGuestsControllerPatch),
+
         typeof(RunTimeAlbumPatch),
+        typeof(RunTimeSchedulerPatch),
 
         // ResourceEx Patches
         typeof(DataBaseCharacterPatch),

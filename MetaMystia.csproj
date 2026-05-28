@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>14</LangVersion>
     <AssemblyName>MetaMystia</AssemblyName>
     <Product>MetaMystia</Product>
-    <Version>0.23.2</Version>
+    <Version>0.25.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
@@ -52,15 +51,17 @@
     <EmbeddedResource Include="ResourceEx\AssetManagement\public.pem" />
     <EmbeddedResource Include="UI\Locales\en.json" />
     <EmbeddedResource Include="UI\Locales\zh-CN.json" />
+    <EmbeddedResource Remove="LogGenerator\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="LogGenerator\LogGenerator.csproj" OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="MetaMystia.Generators\MetaMystia.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="MetaMystia.Generators\**" />
+    <EmbeddedResource Remove="MetaMystia.Generators\**" />
+    <None Remove="MetaMystia.Generators\**" />
     <Compile Remove="LogGenerator\**" />
-    <EmbeddedResource Remove="LogGenerator\**" />
     <None Remove="LogGenerator\**" />
   </ItemGroup>
 

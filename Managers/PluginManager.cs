@@ -66,6 +66,7 @@ public partial class PluginManager : MonoBehaviour
     private void Update()
     {
         UpdateRunOnMainThreadQueue();
+        GuestsMap.TickAllPending();
 
         InGameConsole.Update();
         PlayerListPanel.Update();

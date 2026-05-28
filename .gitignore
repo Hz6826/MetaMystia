@@ -22,5 +22,6 @@
 private.pem
 
 copilot-instructions.md
+.github/memories/
 
 __pycache__

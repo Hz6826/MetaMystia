@@ -20,7 +20,6 @@ public partial class IzakayaConfigPannelPatch
     [HarmonyPrefix]
     public static void IzakayaConfigPannel_OnPanelOpen_Prefix(IzakayaConfigPannel __instance)
     {
-        WorkSceneManager.Clear();
         if (MpManager.IsConnected)
         {
             PrepSceneManager.ClearGroups();
@@ -91,7 +90,6 @@ public partial class IzakayaConfigPannelPatch
         PlayerManager.ResetState();
         string[] ExceptPanels = ["WorkSceneTrayPannel(Clone)", "WorkSceneSustainedPannel(Clone)"];  // 白玉楼测验
         Panel.ClosePanelUntil("IzakayaConfigPannelNew(Clone)", ExceptPanels);
-        WorkSceneManager.Clear();
         _SolveDailyCompletion_b__64_7_Original(instanceRef);
     }
 }
