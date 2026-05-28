@@ -1149,8 +1149,10 @@ public partial class GuestFSM
     private void To(State state)
     {
         FlowLog($"Guest #{GuestsMap.GetRuntimeId(Controller)} FSM: {CurrentState} -> {state}");
+#if DEBUG
         Common.UI.ReceivedObjectDisplayerController.Instance.NotifyTextMessage($"#{RuntimeId}: {CurrentState} -> {state}");
         UI.InGameConsole.ShowPassive($"#{RuntimeId}: {CurrentState} -> {state}");
+#endif
         CurrentState = state;
         if (state == State.Dead || state == State.Left) _pending.Clear();
         Drain();
