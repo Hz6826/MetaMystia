@@ -577,6 +577,21 @@ public partial class GuestFSM
     public static bool SellableEquals(Sellable a, Sellable b)
         => SellableFood.ContentEquals(SellableFood.FromSellable(a), SellableFood.FromSellable(b));
 
+    private static void RestoreFood(Sellable food)
+    {
+        if (food == null) return;
+
+        if (!food.HasModifier && food.AdditiveTags.Count == 0)
+        {
+            Il2CppSystem.Collections.Generic.List<int> toRestore = new Il2CppSystem.Collections.Generic.List<int>(1);
+            toRestore.Add(food.Id);
+            RunTimeStorage.FoodInRange(toRestore.ToIEnumerable(), false);
+            return;
+        }
+
+        IzakayaConfigure.Instance.StoreFood(food);
+    }
+
     /// <summary>
     /// 主机或客机在执行
     /// <see cref="NightScene.UI.GuestManagementUtility.WorkSceneServePannel.Send"/>/<see cref="NightScene.UI.GuestManagementUtility.WorkSceneServePannel.Cancel"/> 时，
@@ -717,7 +732,7 @@ public partial class GuestFSM
         {
             if (fsm.WillServeFood != null && !SellableEquals(fsm.WillServeFood, baseOn))
             {
-                IzakayaConfigure.Instance.StoreFood(fsm.WillServeFood);
+                RestoreFood(fsm.WillServeFood);
             }
             fsm.WillServeFood = sellable;
         }
@@ -966,7 +981,7 @@ public partial class GuestFSM
             var local = order.ServFood ?? order.ServedFoodInAir;
             if (local != null && !SellableEquals(local, food))
             {
-                IzakayaConfigure.Instance.StoreFood(local);
+                RestoreFood(local);
             }
 
             order.ServedFoodInAir = null;
