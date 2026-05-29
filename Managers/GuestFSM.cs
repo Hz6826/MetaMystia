@@ -993,10 +993,11 @@ public partial class GuestFSM
         }
 
         // 收到并处理 ConfirmServeAction 后发现订单已满 => 关闭活动面板，主机端执行评价
+        // 注意：guest 可能已因 OnPanelClose 等路径离开 WaitingServe，此时不应重复触发评价
         if (order.IsFullfilled)
         {
             TryCloseServePanel(fsm.DeskCode);
-            if (MpManager.IsConnectedHost)
+            if (MpManager.IsConnectedHost && fsm.CurrentState == State.WaitingServe)
             {
                 GuestsManager.Instance.EvaluateOrder(controller, false, null);
             }
