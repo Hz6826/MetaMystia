@@ -78,7 +78,7 @@ public partial class GuestsManagerPatch
     private static bool IsReimuProtectionGuest(int id)
         => RunTimeSchedulerPatch.IsDuringReimuProtection && id == ReimuProtectionGuestId;
 
-    private static bool IsReimuProtectionGuest(GuestGroupController controller)
+    internal static bool IsReimuProtectionGuest(GuestGroupController controller)
     {
         if (!RunTimeSchedulerPatch.IsDuringReimuProtection ||
             controller == null ||
@@ -274,8 +274,8 @@ public partial class GuestsManagerPatch
     [HarmonyPrefix]
     public static bool SpawnSpecialGuestGroup_Prefix(ref int id, ref SpecialGuestsController __result)
     {
-        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
         if (IsReimuProtectionGuest(id)) return RunOriginal;
+        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
         if (MpManager.IsConnectedClient)
         {
             __result = null;
@@ -322,8 +322,8 @@ public partial class GuestsManagerPatch
     [HarmonyPrefix]
     public static void PostInitializeGuestGroup_Prefix(GuestGroupController initializedController)
     {
-        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return;
         if (IsReimuProtectionGuest(initializedController)) return;
+        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return;
         if (MpManager.IsConnectedHost)
         {
             // 将主机生成的顾客信息广播给客机
@@ -390,7 +390,6 @@ public partial class GuestsManagerPatch
     public static bool EvaluateOrder_Prefix(GuestGroupController toEvaluate)
     {
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
-        if (IsReimuProtectionGuest(toEvaluate)) return RunOriginal;
         if (MpManager.IsConnectedHost)
         {
             return RunOriginal;
@@ -495,7 +494,6 @@ public partial class GuestsManagerPatch
     public static bool GenerateOrderSession_Prefix(GuestGroupController guestGroup)
     {
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
-        if (IsReimuProtectionGuest(guestGroup)) return RunOriginal;
         if (MpManager.IsConnectedClient)
         {
             // 客机在 DoGenerateOrderSession 中直接调用 GenerateOrderSession 或通过调用 FirstOrder 而间接调用 DoGenerateOrderSession 前
@@ -520,7 +518,6 @@ public partial class GuestsManagerPatch
     public static bool MainOrderCycle_Prefix(GuestGroupController toCycle)
     {
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
-        if (IsReimuProtectionGuest(toCycle)) return RunOriginal;
         if (MpManager.IsConnectedHost)
         {
             return RunOriginal;
@@ -568,7 +565,6 @@ public partial class GuestsManagerPatch
     public static bool OnPatientDepleted_Prefix(GuestGroupController guest)
     {
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
-        if (IsReimuProtectionGuest(guest)) return RunOriginal;
         if (MpManager.IsConnectedHost)
         {
             GuestFSM.OnPatientDepletedInQueue(guest);
@@ -626,7 +622,6 @@ public partial class GuestsManagerPatch
     [HarmonyPrefix]
     public static bool PatientDepletedLeave_Prefix(GuestGroupController toPatientDepletedLeave)
     {
-        if (IsReimuProtectionGuest(toPatientDepletedLeave)) return RunOriginal;
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
         if (MpManager.IsConnectedHost)
         {

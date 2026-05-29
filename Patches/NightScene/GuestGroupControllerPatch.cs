@@ -40,7 +40,7 @@ public partial class GuestGroupControllerPatch
             GuestFSM.OnRefreshCurrentFundAndOrder(__instance);
         }
     }
-    
+
     /// <summary>
     /// 主机捕捉 MoveToDesk 的目标桌号并同步。顾客组可能刚生成即可入座，也可能因座满先入队，后被送出队伍入座。
     /// </summary>
@@ -51,6 +51,7 @@ public partial class GuestGroupControllerPatch
     [HarmonyPrefix]
     public static void MoveToDesk_Prefix(GuestGroupController __instance, int deskCode, ref Il2CppSystem.Action onMovementFinishCallback)
     {
+        if (GuestsManagerPatch.IsReimuProtectionGuest(__instance)) return;
         if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return;
         if (MpManager.IsConnectedHost)
         {
