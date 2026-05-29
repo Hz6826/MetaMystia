@@ -340,6 +340,7 @@ public partial class GuestFSM
         var fsm = GuestsMap.GetGuestFsm(controller);
 
         PlayerRepellAction.Send(fsm.RuntimeId);
+        fsm.To(State.Left);
     }
 
     /// <summary>
@@ -350,14 +351,14 @@ public partial class GuestFSM
     {
         var fsm = GuestsMap.GetGuestFsm(runtimeId);
         if (fsm == null) return false;
-        if (fsm.CurrentState == State.Dead || fsm.CurrentState == State.Left) return false;
+        if (fsm.CurrentState == State.Dead || fsm.CurrentState == State.Left) return true;
         var deskCode = fsm.Controller.DeskCode;
 
         // 正常调用栈为: PlayerRepell -> RepellInternal -> LeaveFromDesk
         // 然而本 Mod 默认会阻止 RepellInternal LeaveFromDesk 等方法的调用，因此需要逐级设置 Skip*Patch 以跳过客机 Prefix 中的跳过逻辑
         GuestsManagerPatch.SkipPlayerRepellPatch.Grant();
         GuestsManager.Instance.PlayerRepell(deskCode);
-        fsm.To(State.Leaving);
+        fsm.To(State.Left);
         return true;
     }
 
@@ -1150,7 +1151,7 @@ public partial class GuestFSM
     {
         var fsm = GuestsMap.GetGuestFsm(runtimeId);
         if (fsm == null) return false;
-        if (fsm.CurrentState == State.Dead || fsm.CurrentState == State.Left) return false;
+        if (fsm.CurrentState == State.Dead || fsm.CurrentState == State.Left) return true;
         FlowLog($"Guest #{runtimeId} DoLeaveFromDesk from {fsm.CurrentState}, leaveType={leaveType}");
         GuestsManagerPatch.SkipLeaveFromDeskPatch.Grant();
         GuestsManager.Instance.LeaveFromDesk(fsm.Controller, leaveType, null, triggerLeaveBuff);
