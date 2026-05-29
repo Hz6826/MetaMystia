@@ -376,6 +376,7 @@ public partial class GuestsManagerPatch
     public static void PlayerRepell_Postfix()
     {
         SkipRepellInternalLeaveBroadcastPatch.Reset();
+        SkipLeaveFromDeskBroadcastPatch.Reset();
     }
 
 
