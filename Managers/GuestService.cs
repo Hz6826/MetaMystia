@@ -5,8 +5,11 @@ using UnityEngine;
 using GameData.Core.Collections.CharacterUtility;
 using GameData.Core.Collections.NightSceneUtility;
 using GameData.RunTime.Common;
+using Il2CppInterop.Runtime;
+using Il2CppSystem;
 using NightScene.GuestManagementUtility;
 using NightScene.EventUtility;
+using Night.UI.HUD.Ordering;
 
 using MetaMystia.Network;
 using MetaMystia.Patch;
@@ -181,11 +184,59 @@ public static partial class GuestService
     }
     
     /// <summary>
+    /// 注销 OrderController 订单与桌位交互回调。CleanOrderInfo 按 PeekOrders 引用匹配，
+    /// 客机重放订单时可能与 HUD 实例不一致，需按 DeskCode 兜底。
+    /// </summary>
+    public static void CleanGuestOrderRegistration(GuestGroupController controller)
+    {
+        if (controller == null) return;
+        var deskCode = controller.DeskCode;
+
+        if (controller.AllOrdersCount > 0)
+            GuestsManager.Instance.CleanOrderInfo(controller);
+
+        if (deskCode == -1) return;
+
+        RemoveHudOrderForDesk(deskCode);
+        // 唯一公开入口：仅 Remove(deskCode)，与 DLC4 语义无关
+        GuestsManager.Instance.EndDlc4SpecialManualOrder(controller);
+    }
+
+    /// <summary>
+    /// FSM 已移除时仍清理 HUD 订单（主机 GuestKillAction 携带 DeskCode）。
+    /// </summary>
+    public static void CleanGuestOrderRegistrationForDesk(int deskCode)
+    {
+        if (deskCode == -1) return;
+        RemoveHudOrderForDesk(deskCode);
+        var guest = GuestsManager.Instance.GetInDeskGuest(deskCode);
+        if (guest != null)
+            GuestsManager.Instance.EndDlc4SpecialManualOrder(guest);
+    }
+
+    private static int _removeHudOrderDeskCode;
+
+    private static bool MatchHudOrderDesk(GuestsManager.OrderBase order)
+        => order.DeskCode == _removeHudOrderDeskCode;
+
+    private static void RemoveHudOrderForDesk(int deskCode)
+    {
+        _removeHudOrderDeskCode = deskCode;
+        System.Predicate<GuestsManager.OrderBase> match = MatchHudOrderDesk;
+        OrderController.RemoveOrder(
+            DelegateSupport.ConvertDelegate<Predicate<GuestsManager.OrderBase>>(match),
+            "MetaMystia::ForceCleanupGuest");
+    }
+
+    /// <summary>
     /// 通用性强制清理
     /// </summary>
     public static void ReplayForceCleanupGuest(GuestGroupController controller)
     {
         if (controller == null) return;
+
+        CleanGuestOrderRegistration(controller);
+
         if (!controller.HaveNotLeft())
         {
             controller.FlyToSpawn(true);
@@ -194,9 +245,6 @@ public static partial class GuestService
 
         if (controller.DeskCode != -1)
         {
-            // LeaveFromDesk 不注销 OrderController / registeredCharacterArrivedEvents，需与 RepellInternal 对齐
-            if (controller.AllOrdersCount > 0)
-                GuestsManager.Instance.CleanOrderInfo(controller);
             GuestsManager.Instance.RemoveFromPatientCountdown(controller);
             GuestFSM.TryCloseServePanel(controller.DeskCode);
             GuestsManagerPatch.LeaveFromDesk_ReversePatch(GuestsManager.Instance, controller, GuestGroupController.LeaveType.Fading, null, false);

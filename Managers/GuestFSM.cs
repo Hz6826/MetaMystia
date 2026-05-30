@@ -1196,7 +1196,7 @@ public partial class GuestFSM
 
         if (MpManager.IsConnectedHost)
         {
-            GuestKillAction.Send(rid, stateBefore);
+            GuestKillAction.Send(rid, stateBefore, Controller?.DeskCode ?? -1);
         }
 
         To(State.Dead);
