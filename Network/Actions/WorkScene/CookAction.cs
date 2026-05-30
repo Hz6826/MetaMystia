@@ -47,7 +47,7 @@ public partial class CookAction : Action
                 return;
             }
 
-            CookControllerPatch.SetCook_Original(cookerController, food, recipe, false);
+            CookControllerPatch.SetCook_ReversePatch(cookerController, food, recipe, false);
         });
     }
 

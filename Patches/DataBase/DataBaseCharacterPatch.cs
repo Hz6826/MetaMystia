@@ -1,11 +1,9 @@
 using HarmonyLib;
-using UnityEngine;
 using UnityEngine.UI;
 
 using GameData.Core.Collections.CharacterUtility;
 using GameData.Profile;
 
-using DEYU.Utils;
 using static MetaMystia.Patch.HarmonyPrefixFlow;
 
 namespace MetaMystia.Patch;

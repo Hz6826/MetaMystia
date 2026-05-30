@@ -5,6 +5,7 @@ using GameData.RunTime.NightSceneUtility;
 
 using MetaMystia.Network;
 using MetaMystia.UI;
+
 using static MetaMystia.Patch.HarmonyPrefixFlow;
 
 namespace MetaMystia.Patch;

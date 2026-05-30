@@ -17,7 +17,6 @@ public static partial class PatchRegistry
         typeof(UniversalGameManagerPatch),
 
         // DayScene Patches
-        typeof(DaySceneUtilityPatch),
         typeof(StatusTrackerPatch),
         typeof(CharacterControllerUnitPatch),
         typeof(CharacterControllerInputGeneratorComponentPatch),

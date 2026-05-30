@@ -30,9 +30,9 @@ public partial class ConfirmSelectAction : Action
                 IzakayaSelectorPanelPatch.instanceRef.m_CurrentSelectedIzakayaLevel = (Common.UI.IzakayaLevel)MapLevel;
                 if (IzakayaSelectorPanelPatch.cachedSpots.TryGetValue(MapLabel, out var mapSpot))
                 {
-                    IzakayaSelectorPanelPatch.OnGuideMapSpotSelected_Original(IzakayaSelectorPanelPatch.instanceRef, mapSpot);
+                    IzakayaSelectorPanelPatch.OnGuideMapSpotSelected_ReversePatch(IzakayaSelectorPanelPatch.instanceRef, mapSpot);
                 }
-                IzakayaSelectorPanelPatch._OnGuideMapInitialize_b__21_0_Original(
+                IzakayaSelectorPanelPatch._OnGuideMapInitialize_b__21_0_ReversePatch(
                     IzakayaSelectorPanelPatch.instanceRef);
             }
             else

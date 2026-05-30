@@ -5,6 +5,7 @@ using PrepNightScene.UI;
 using MetaMystia.Network;
 using MetaMystia.UI;
 using SgrYuki.Utils;
+
 using static MetaMystia.Patch.HarmonyPrefixFlow;
 
 namespace MetaMystia.Patch;
@@ -79,10 +80,8 @@ public partial class IzakayaConfigPannelPatch
 
     [HarmonyPatch(nameof(IzakayaConfigPannel._SolveDailyCompletion_b__64_7))]
     [HarmonyReversePatch]
-    private static void _SolveDailyCompletion_b__64_7_Original(IzakayaConfigPannel __instance)
-    {
-        throw new System.NotImplementedException();
-    }
+    private static void _SolveDailyCompletion_b__64_7_ReversePatch(IzakayaConfigPannel __instance)
+    { }
 
     public static void PrepOver()
     {
@@ -90,6 +89,6 @@ public partial class IzakayaConfigPannelPatch
         PlayerManager.ResetState();
         string[] ExceptPanels = ["WorkSceneTrayPannel(Clone)", "WorkSceneSustainedPannel(Clone)"];  // 白玉楼测验
         Panel.ClosePanelUntil("IzakayaConfigPannelNew(Clone)", ExceptPanels);
-        _SolveDailyCompletion_b__64_7_Original(instanceRef);
+        _SolveDailyCompletion_b__64_7_ReversePatch(instanceRef);
     }
 }

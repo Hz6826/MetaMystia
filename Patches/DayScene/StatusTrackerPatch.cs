@@ -19,7 +19,5 @@ public static partial class StatusTrackerPatch
     [HarmonyPatch(nameof(StatusTracker.RecordInvitedGuest))]
     [HarmonyReversePatch]
     public static void RecordInvitedGuest_ReversePatch(StatusTracker __instance, int guestId)
-    {
-        throw new System.NotImplementedException();
-    }
+    { }
 }
