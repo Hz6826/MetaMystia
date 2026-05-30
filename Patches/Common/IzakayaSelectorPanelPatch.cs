@@ -16,7 +16,7 @@ namespace MetaMystia.Patch;
 public partial class IzakayaSelectorPanelPatch
 {
     public static IzakayaSelectorPanel_New instanceRef = null;
-    public static Dictionary<string, Common.UI.GlobalMap.IGuideMapSpot> cachedSpots = new ();
+    public static Dictionary<string, Common.UI.GlobalMap.IGuideMapSpot> cachedSpots = new();
 
     [HarmonyPatch(nameof(IzakayaSelectorPanel_New.OnGuideMapInitialize))]
     [HarmonyPrefix]
@@ -100,8 +100,8 @@ public partial class IzakayaSelectorPanelPatch
         Log.LogMessage($"All peers match selection: {mySelect}, broadcasting CONFIRM and proceeding");
         ConfirmSelectAction.Broadcast(mapLabel, level);
         InGameConsole.ShowPassive(TextId.SelectedIzakaya.Get(mySelect));
-        SgrYuki.Utils.Panel.CloseActivePanelsBeforeSceneTransit();
-        _OnGuideMapInitialize_b__21_0_ReversePatch(instanceRef);
+
+        TryProceedWithConfirmedSelection(mapLabel, (IzakayaLevel)level);
     }
 
     /// <summary>
@@ -123,6 +123,26 @@ public partial class IzakayaSelectorPanelPatch
             InGameConsole.ShowPassive(TextId.SelectedIzakayaMismatch.Get(mySelect, mismatch ?? "???"));
         }
     }
+
+    public static void TryProceedWithConfirmedSelection(string mapLabel, IzakayaLevel mapLevel)
+    {
+        SgrYuki.Utils.Panel.CloseActivePanelsBeforeSceneTransit();
+
+        if (instanceRef != null)
+        {
+            instanceRef.m_CurrentSelectedIzakayaLevel = mapLevel;
+            if (cachedSpots.TryGetValue(mapLabel, out var mapSpot))
+            {
+                OnGuideMapSpotSelected_ReversePatch(instanceRef, mapSpot);
+            }
+            _OnGuideMapInitialize_b__21_0_ReversePatch(instanceRef);
+        }
+        else
+        {
+            Log.Error("instanceRef is null, cannot call original method");
+        }
+    }
+
 
     [HarmonyPatch(nameof(IzakayaSelectorPanel_New._OnGuideMapInitialize_b__21_0))]
     [HarmonyReversePatch]
