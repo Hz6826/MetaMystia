@@ -194,6 +194,11 @@ public static partial class GuestService
 
         if (controller.DeskCode != -1)
         {
+            // LeaveFromDesk 不注销 OrderController / registeredCharacterArrivedEvents，需与 RepellInternal 对齐
+            if (controller.AllOrdersCount > 0)
+                GuestsManager.Instance.CleanOrderInfo(controller);
+            GuestsManager.Instance.RemoveFromPatientCountdown(controller);
+            GuestFSM.TryCloseServePanel(controller.DeskCode);
             GuestsManagerPatch.LeaveFromDesk_ReversePatch(GuestsManager.Instance, controller, GuestGroupController.LeaveType.Fading, null, false);
             return;
         }
