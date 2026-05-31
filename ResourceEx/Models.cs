@@ -5,6 +5,7 @@ using static GameData.Core.Collections.DaySceneUtility.Collections.Product;
 using static GameData.Core.Collections.Sellable;
 using static GameData.Profile.SchedulerNode;
 using static GameData.Profile.SchedulerNode.Trigger;
+using GameData.Profile.SchedulerNodeCollection;
 using static GameData.Profile.SchedulerNodeCollection.MissionNode.FinishCondition;
 
 namespace MetaMystia.ResourceEx.Models;
@@ -283,8 +284,12 @@ public class MissionNodeConfig
     public List<MissionRewardConfig> postRewards { get; set; }
     public List<MissionFinishConditionConfig> finishConditions { get; set; }
     public EventDataConfig missionFinishEvent { get; set; }
+    public EventDataConfig missionFailedEvent { get; set; }
     public List<string> postMissionsAfterPerformance { get; set; }
     public List<string> postEvents { get; set; }
+    public bool isTimedMission { get; set; } = false;
+    public MissionNode.MissionFailedAction missionFailedAction { get; set; } = MissionNode.MissionFailedAction.None;
+    public TriggerConfig missionTimeLimit { get; set; }
 }
 
 public class MissionRewardConfig
@@ -319,10 +324,20 @@ public class EventNodeConfig
     public List<string> postEvents { get; set; }
 }
 
+public class DayConfig
+{
+    public Day.DayType dayType { get; set; }
+    public Day.CalculateType dayCalcType { get; set; }
+    public int day { get; set; }
+    public int dayRangeMin { get; set; }
+    public int dayRangeMax { get; set; }
+}
+
 public class TriggerConfig
 {
     public TriggerType triggerType { get; set; }
     public string triggerId { get; set; }
+    public DayConfig time { get; set; }
 }
 
 public class ScheduledEventConfig
