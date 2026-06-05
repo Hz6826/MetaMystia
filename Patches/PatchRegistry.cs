@@ -63,6 +63,8 @@ public static partial class PatchRegistry
         typeof(DataBaseSchedulerPatch),
         typeof(RunTimeDayScenePatch),
         typeof(DaySceneChatSelectionPannel__c__DisplayClass17_0Patch),
+        typeof(CollabBehaviourComponentPatch),
+        typeof(DaySceneUIManagerPatch),
         typeof(TrackedMissionDataPatch),
     ];
 
