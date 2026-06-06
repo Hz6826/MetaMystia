@@ -319,7 +319,10 @@ public static partial class MpWire
     {
         while (_inbox.TryDequeue(out var item))
         {
-            item.Action.SenderUid = item.FromUid;
+            // 主机：每条 TCP 连接对应真实 uid，可覆盖包体以防伪造。
+            // 客机：线层 fromUid 恒为 HostUid，真实发送者已在主机转发时写入包体 SenderUid。
+            if (Session.IsRoomHost)
+                item.Action.SenderUid = item.FromUid;
             item.Action.OnReceived();
         }
     }
