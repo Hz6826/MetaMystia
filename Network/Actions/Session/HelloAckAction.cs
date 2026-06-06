@@ -12,7 +12,6 @@ namespace MetaMystia.Network;
 [AutoLog]
 public partial class HelloAckAction : Action
 {
-    public override ActionType Type => ActionType.HELLO_ACK;
     public int AssignedUid { get; set; }
 
     /// <summary>
@@ -45,7 +44,7 @@ public partial class HelloAckAction : Action
     /// </summary>
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsHost)
+        if (MpManager.IsRoomHost)
         {
             Log.LogWarning("HelloAck received by host, ignoring");
             return;
@@ -71,7 +70,7 @@ public partial class HelloAckAction : Action
             PlayerManager.SpawnPeers();
         }
 
-        MpManager.OnHandshakeComplete(HostInfo.PeerId);
+        MpWire.OnHandshakeComplete(HostInfo.PeerId);
         InGameConsole.ShowPassiveFromAnyThread(TextId.MpConnected.Get(HostInfo.PeerId));
     }
 
@@ -94,7 +93,8 @@ public partial class HelloAckAction : Action
         {
             AssignedUid = clientUid,
             HostInfo = hostInfo,
-            ExistingPeers = existingPeers.ToArray()
-        }.SendToClient(clientUid);
+            ExistingPeers = existingPeers.ToArray(),
+            WireTargetUid = clientUid,
+        }.Send();
     }
 }

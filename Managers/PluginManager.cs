@@ -66,6 +66,7 @@ public partial class PluginManager : MonoBehaviour
     private void Update()
     {
         UpdateRunOnMainThreadQueue();
+        Network.MpWire.FlushInbox();
         MpManager.RefreshInStoryCache();
         GuestsMap.TickAllPending();
 
@@ -80,14 +81,14 @@ public partial class PluginManager : MonoBehaviour
         {
             IsStatusVisible = !IsStatusVisible;
             Log.LogMessage($"Toggled text visibility: " + IsStatusVisible);
-            FloatingTextHelper.SetLabelsVisible(IsStatusVisible && MpManager.IsConnected);
+            FloatingTextHelper.SetLabelsVisible(IsStatusVisible && MpManager.CanSeeOnlinePlayers);
         }
 
         if (DEBUG)
         {
             if (Input.GetKeyDown(KeyCode.F1))
             {
-                MpManager.Start(MpManager.ROLE.Host);
+                MpManager.Start(MpManager.ROLE.Server);
                 InGameConsole.ShowPassive("[DEBUG] Started as Host");
             }
             if (Input.GetKeyDown(KeyCode.F2))

@@ -8,10 +8,9 @@ namespace MetaMystia.Network;
 /// </summary>
 [MemoryPackable]
 [AutoLog]
-[HostRelay]
-public partial class PrepAction : Action
+[RoomRelay]
+public partial class UpdatePrepAction : Action
 {
-    public override ActionType Type => ActionType.PREP;
 
     [MemoryPackable]
     public partial class Table
@@ -37,10 +36,10 @@ public partial class PrepAction : Action
 
     public static void Send(Table prepTable)
     {
-        var action = new PrepAction
+        var action = new UpdatePrepAction
         {
             PrepTable = prepTable
         };
-        action.SendToHostOrBroadcast();
+        action.Send();
     }
 }

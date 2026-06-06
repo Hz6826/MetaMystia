@@ -13,7 +13,6 @@ namespace MetaMystia.Network;
 [AutoLog]
 public partial class HelloAction : Action
 {
-    public override ActionType Type => ActionType.HELLO;
     public string Version { get; set; } = "";
     public string GameVersion { get; set; } = "";
     public Scene CurrentGameScene { get; set; }
@@ -28,7 +27,7 @@ public partial class HelloAction : Action
     /// </summary>
     public override void OnReceivedDerived()
     {
-        if (!MpManager.IsHost)
+        if (!MpManager.IsRoomHost)
         {
             Log.LogWarning("Hello received by non-host, ignoring");
             return;
@@ -106,7 +105,7 @@ public partial class HelloAction : Action
         PeerJoinAction.BroadcastExcept(PeerInfo.Uid, PeerInfo);
 
         // 启动同步
-        MpManager.OnPeerHandshakeComplete(PeerInfo.Uid);
+        MpWire.OnPeerHandshakeComplete(PeerInfo.Uid);
 
         InGameConsole.ShowPassiveFromAnyThread(TextId.MpConnected.Get(PeerInfo.PeerId));
     }
@@ -114,7 +113,7 @@ public partial class HelloAction : Action
     /// <summary>
     /// 客机发送 Hello 给主机请求连接
     /// </summary>
-    public static void Send()
+    public static void SendHello()
     {
         PlayerInfo peerInfo = new PlayerInfo()
         {
@@ -131,6 +130,6 @@ public partial class HelloAction : Action
             Version = Plugin.ModVersion,
             CurrentGameScene = MpManager.LocalScene,
             GameVersion = Plugin.GameVersion,
-        }.SendToHostOrBroadcast();
+        }.Send();
     }
 }

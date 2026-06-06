@@ -18,10 +18,9 @@ public enum ReadyType
 /// </summary>
 [MemoryPackable]
 [AutoLog]
-[HostRelay]
-public partial class ReadyAction : Action
+[RoomRelay]
+public partial class PhaseReadyAction : Action
 {
-    public override ActionType Type => ActionType.READY;
     public ReadyType ReadyType;
     public bool AllReady = false;
     public override void OnReceivedDerived()
@@ -73,15 +72,6 @@ public partial class ReadyAction : Action
     }
 
 
-    public static void Send(ReadyType readyType)
-    {
-        var action = new ReadyAction { ReadyType = readyType };
-        action.SendToHostOrBroadcast();
-    }
-
-    public static void Broadcast(ReadyType readyType)
-    {
-        var action = new ReadyAction { ReadyType = readyType, AllReady = true };
-        action.SendToHostOrBroadcast();
-    }
+    public static void Send(ReadyType readyType, bool allReady = false) =>
+        new PhaseReadyAction { ReadyType = readyType, AllReady = allReady }.Send();
 }

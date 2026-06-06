@@ -13,7 +13,6 @@ namespace MetaMystia.Network;
 [AutoLog]
 public partial class IzakayaCloseAction : Action
 {
-    public override ActionType Type => ActionType.IZAKAYA_CLOSE;
 
     /// <summary>
     /// 客机收到主机广播的打烊命令 → 设置允许打烊标志并直接触发打烊流程
@@ -43,6 +42,6 @@ public partial class IzakayaCloseAction : Action
     /// </summary>
     public static void Broadcast()
     {
-        new IzakayaCloseAction().SendToHostOrBroadcast();
+        new IzakayaCloseAction().Send();
     }
 }
