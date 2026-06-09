@@ -29,6 +29,7 @@ public partial class UpdatePrepAction : Action
     protected override bool OnSendLogOnlyAction => true;
     protected override bool OnReceiveLogOnlyAction => true;
 
+    [CheckScene(Common.UI.Scene.IzakayaPrepScene)]
     public override void OnReceivedDerived()
     {
         PrepSceneManager.MergeFromPeer(PrepTable);
