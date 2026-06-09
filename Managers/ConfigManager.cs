@@ -91,9 +91,9 @@ public static partial class ConfigManager
             "启用 IPv6 双栈监听（IPv4 始终可用）");
 
         LocaleOverride = Config.Bind("General", "LocaleOverride", "",
-            "Path to a directory containing locale override JSON files (en.json, zh-CN.json).\n" +
-            "Supports absolute or relative path (relative to BepInEx/plugins/).\n" +
-            "翻译文件覆盖目录路径，支持绝对路径或相对路径(相对于 BepInEx/plugins/)");
+            "Locale override: a single .json file (merged into current game language, missing keys fall back to built-in),\n" +
+            "or a directory with en.json / zh-CN.json. Supports absolute or relative path (relative to BepInEx/plugins/).\n" +
+            "翻译覆盖：单个 .json 文件（按当前游戏语言覆盖，未覆盖项回退内置翻译），或含 en.json/zh-CN.json 的目录。");
 
         NoteBookSkinPortrait = Config.Bind("Experimental", "NoteBookSkinPortrait", false,
             "(Experimental) Enable portrait replacement for Skin System in NoteBook\n" +
