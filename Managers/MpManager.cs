@@ -62,6 +62,9 @@ public static partial class MpManager
     public static Common.UI.Scene LocalScene { get; private set; } = Common.UI.Scene.EmptyScene;
     public static Common.UI.Scene PeerScene = Common.UI.Scene.EmptyScene;
 
+    /// <summary>至少进入过一次主界面后，才允许开服或连接主机。</summary>
+    public static bool IsMultiplayerAvailable { get; private set; }
+
     public static int WorkTimeSecondOverride = 9 * 60;
 
     private static bool _inStory;
@@ -102,8 +105,11 @@ public static partial class MpManager
         return string.IsNullOrEmpty(result) ? (fallback ?? Environment.MachineName) : result;
     }
 
-    public static bool Start(ROLE r = ROLE.Server, int port = -1) =>
-        r == ROLE.Server ? MpWire.StartHost(port) : MpWire.StartClientMode();
+    public static bool Start(ROLE r = ROLE.Server, int port = -1)
+    {
+        if (!EnsureMultiplayerAvailable()) return false;
+        return r == ROLE.Server ? MpWire.StartHost(port) : MpWire.StartClientMode();
+    }
 
     public static void Stop() => MpWire.Stop();
 
@@ -114,31 +120,40 @@ public static partial class MpManager
         return Start(ROLE.Server, port);
     }
 
-    public static Task<bool> ConnectToPeerAsync(string peerIp, int port = -1, bool stop_existed_server = true) =>
-        MpWire.ConnectAsync(peerIp, port, stop_existed_server);
+    public static Task<bool> ConnectToPeerAsync(string peerIp, int port = -1, bool stop_existed_server = true)
+    {
+        if (!EnsureMultiplayerAvailable()) return Task.FromResult(false);
+        return MpWire.ConnectAsync(peerIp, port, stop_existed_server);
+    }
 
     public static void DisconnectPeer() => MpWire.DisconnectPeer();
 
     public static void DisconnectClient(int uid) => MpWire.DisconnectClient(uid);
 
-    public static void EnterRelayPublic()
+    public static bool EnterRelayPublic()
     {
+        if (!EnsureMultiplayerAvailable()) return false;
         MpWire.StartClientMode();
         Session.EnterRelayPublic();
+        return true;
     }
 
-    public static void EnterRelayRoomAsHost(string roomId, int hostUid = HOST_UID)
+    public static bool EnterRelayRoomAsHost(string roomId, int hostUid = HOST_UID)
     {
+        if (!EnsureMultiplayerAvailable()) return false;
         MpWire.StartHost();
         PlayerManager.Local.Uid = hostUid;
         Session.EnterRelayRoom(RoomRole.Host, roomId, hostUid);
+        return true;
     }
 
-    public static void EnterRelayRoomAsClient(string roomId, int localUid, int hostUid = HOST_UID)
+    public static bool EnterRelayRoomAsClient(string roomId, int localUid, int hostUid = HOST_UID)
     {
+        if (!EnsureMultiplayerAvailable()) return false;
         MpWire.StartClientMode();
         PlayerManager.Local.Uid = localUid;
         Session.EnterRelayRoom(RoomRole.Client, roomId, hostUid);
+        return true;
     }
 
     public static void CheckContinueAfterDisconnect(int disconnectedUid, string disconnectedName)
@@ -204,6 +219,9 @@ public static partial class MpManager
         SceneTransitAction.Send(newScene);
         LocalScene = newScene;
         if (newScene != Common.UI.Scene.MainScene) return;
+
+        IsMultiplayerAvailable = true;
+
         if (IsConnected)
         {
             Log.Message($"Transit to {newScene}, disconnecting peers");
@@ -215,6 +233,30 @@ public static partial class MpManager
             CommandScheduler.RemoveKeyFromKeyQueue(PeerGetCharacterUnitNotNullCommand);
             CommandScheduler.CancelInterval(MpWire.SyncActionCommandId);
         }
+    }
+
+    private static bool EnsureMultiplayerAvailable()
+    {
+        if (!IsMultiplayerAvailable)
+        {
+            NotifyMpBlocked(TextId.MpMainSceneRequired);
+            return false;
+        }
+
+        PlayerManager.Local.ReloadResourceTable();
+        if (!PlayerManager.Local.IncrementalDataBase.IsIncrementalReady)
+        {
+            NotifyMpBlocked(TextId.GameResourcesNotLoaded);
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void NotifyMpBlocked(TextId reason)
+    {
+        InGameConsole.ShowPassiveFromAnyThread(reason.Get());
+        Log.LogWarning($"Multiplayer blocked: {reason}");
     }
 
     public static void DayOver()

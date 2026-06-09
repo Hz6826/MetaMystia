@@ -43,6 +43,8 @@ public enum TextId
     // Network Error Messages
     ModVersionMismatch,
     GameVersionMismatch,
+    GameResourcesNotLoaded,
+    MpMainSceneRequired,
     SceneMismatchDisconnected,
 
     // Connection Status Notifications

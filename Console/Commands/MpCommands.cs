@@ -43,6 +43,8 @@ public static class MpCommands
                 else
                     ctx.Log(TextId.MpStartedAsHost.Get());
             }
+            else if (!MpManager.IsMultiplayerAvailable)
+                ctx.Log(ConsoleFormat.Err(TextId.MpMainSceneRequired.Get()));
         });
 
         // /mp start server (deprecated alias)
@@ -62,6 +64,8 @@ public static class MpCommands
             }
             if (MpManager.Start(MpManager.ROLE.Server))
                 ctx.Log(TextId.MpStartedAsHost.Get());
+            else if (!MpManager.IsMultiplayerAvailable)
+                ctx.Log(ConsoleFormat.Err(TextId.MpMainSceneRequired.Get()));
         });
         startCmd.AddCommand(startServerCmd);
 

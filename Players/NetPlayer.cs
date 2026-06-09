@@ -54,6 +54,11 @@ public abstract partial class NetPlayer
     }
     private ResourceDataBase _incrementalDataBase;
 
+    public void ReloadResourceTable()
+    {
+        DataBase.LoadResourceIds();
+        _incrementalDataBase = null;
+    }
 
     #region 角色状态
     /// <summary>

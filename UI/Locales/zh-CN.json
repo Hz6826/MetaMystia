@@ -29,6 +29,8 @@
     "ModPatchFailure": "补丁注入失败！此Mod将不会正常运行！可能是你的游戏版本不受支持？请考虑移除此Mod进行游玩！",
     "ModVersionMismatch": "Mod 版本不匹配，连接已断开！",
     "GameVersionMismatch": "游戏版本不匹配，连接已断开！",
+    "GameResourcesNotLoaded": "游戏资源尚未加载完成，无法加入联机房间",
+    "MpMainSceneRequired": "请先进入游戏主界面后再使用联机功能",
     "SceneMismatchDisconnected": "有玩家不同处于白天或主界面，连接已断开",
     "MultiplayerConnected": "已成功连接到房间",
     "MultiplayerDisconnected": "已断开连接",

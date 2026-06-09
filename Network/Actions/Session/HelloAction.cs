@@ -48,6 +48,13 @@ public partial class HelloAction : Action
             return;
         }
 
+        if (PeerInfo?.IncrementalDataBase is not { IsIncrementalReady: true })
+        {
+            Log.LogWarning($"Rejecting connection from '{PeerInfo?.PeerId}' (uid={SenderUid}): game resources not loaded");
+            RejectAction.SendAndDisconnect(SenderUid, TextId.GameResourcesNotLoaded);
+            return;
+        }
+
         // --- 备菜/营业阶段不允许重连 ---
         if (MpManager.LocalScene == Scene.IzakayaPrepScene || MpManager.LocalScene == Scene.WorkScene)
         {

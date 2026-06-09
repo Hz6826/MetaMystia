@@ -29,6 +29,8 @@
     "ModPatchFailure": "Patch failure! The Mod will not function normally! Maybe your game version is not supported, please consider removing the mod!",
     "ModVersionMismatch": "Mod version mismatch, connection disconnected!",
     "GameVersionMismatch": "Game version mismatch, connection disconnected!",
+    "GameResourcesNotLoaded": "Game resources are not fully loaded; cannot join multiplayer room",
+    "MpMainSceneRequired": "Enter the main menu before using multiplayer",
     "SceneMismatchDisconnected": "One or more players are not in the DayScene or MainScene at the same time, connection disconnected!",
     "MultiplayerConnected": "Connected to room",
     "MultiplayerDisconnected": "Disconnected",
