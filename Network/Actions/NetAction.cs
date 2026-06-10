@@ -23,12 +23,15 @@ public enum ActionType : ushort
     SceneTransit,
     MoveSync,
     NightMoveSync,
-    
-    PhaseReady,
+
+    DayReady,
+    DayAllReady,
     SelectIzakaya,
     ConfirmIzakaya,
     UpdatePrep,
-    
+    PrepReady,
+    PrepAllReady,
+
     NightCook,
     ExtractFromCooker,
     StoreFood, // 这是往保温箱中存储，仅可以存储 food
@@ -36,7 +39,7 @@ public enum ActionType : ushort
     ExtractFood,
     QTE,
     Buff,
-    
+
     GuestInvite,
     GuestSpawn,
     MoveToDesk,
@@ -51,12 +54,12 @@ public enum ActionType : ushort
     PatientDepletedQueue,
     PatientDepletedDesk,
     GuestKill,
-    
+
     FundEdit,
     TipEdit,
     ExpEdit,
     PassionEdit,
-    
+
     IzakayaClose,
 }
 
@@ -74,10 +77,13 @@ public enum ActionType : ushort
 [MemoryPackUnion((ushort)ActionType.SceneTransit, typeof(SceneTransitAction))]
 [MemoryPackUnion((ushort)ActionType.MoveSync, typeof(MoveSyncAction))]
 [MemoryPackUnion((ushort)ActionType.NightMoveSync, typeof(NightMoveSyncAction))]
-[MemoryPackUnion((ushort)ActionType.PhaseReady, typeof(PhaseReadyAction))]
+[MemoryPackUnion((ushort)ActionType.DayReady, typeof(DayReadyAction))]
+[MemoryPackUnion((ushort)ActionType.DayAllReady, typeof(DayAllReadyAction))]
 [MemoryPackUnion((ushort)ActionType.SelectIzakaya, typeof(SelectIzakayaAction))]
 [MemoryPackUnion((ushort)ActionType.ConfirmIzakaya, typeof(ConfirmIzakayaAction))]
 [MemoryPackUnion((ushort)ActionType.UpdatePrep, typeof(UpdatePrepAction))]
+[MemoryPackUnion((ushort)ActionType.PrepReady, typeof(PrepReadyAction))]
+[MemoryPackUnion((ushort)ActionType.PrepAllReady, typeof(PrepAllReadyAction))]
 [MemoryPackUnion((ushort)ActionType.NightCook, typeof(NightCookAction))]
 [MemoryPackUnion((ushort)ActionType.ExtractFromCooker, typeof(ExtractFromCookerAction))]
 [MemoryPackUnion((ushort)ActionType.StoreFood, typeof(StoreFoodAction))]

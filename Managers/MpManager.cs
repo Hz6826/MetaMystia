@@ -264,7 +264,7 @@ public static partial class MpManager
         if (!IsConnectedServer) return;
         if (PlayerManager.AllDayOver)
         {
-            PhaseReadyAction.Send(ReadyType.DayOver, allReady: true);
+            DayAllReadyAction.Broadcast();
             CommandScheduler.EnqueueWithNoCondition(() =>
             {
                 InGameConsole.ShowPassive(TextId.AllReadyTransition.Get());
@@ -278,7 +278,7 @@ public static partial class MpManager
         if (!IsConnectedServer) return;
         if (PlayerManager.AllPrepOver)
         {
-            PhaseReadyAction.Send(ReadyType.PrepOver, allReady: true);
+            PrepAllReadyAction.Broadcast();
             CommandScheduler.EnqueueWithNoCondition(IzakayaConfigPannelPatch.PrepOver);
         }
     }
@@ -287,7 +287,7 @@ public static partial class MpManager
     {
         if (!IsRoomHost || LocalScene != Common.UI.Scene.DayScene || !LocalIsDayOver) return false;
         foreach (var peer in PlayerManager.Peers.Values) peer.IsDayOver = true;
-        PhaseReadyAction.Send(ReadyType.DayOver, allReady: true);
+        DayAllReadyAction.Broadcast();
         CommandScheduler.EnqueueWithNoCondition(() =>
         {
             InGameConsole.ShowPassive(TextId.AllReadyTransition.Get());
@@ -301,7 +301,7 @@ public static partial class MpManager
         if (!IsRoomHost || (LocalScene != Common.UI.Scene.IzakayaPrepScene && LocalScene != Common.UI.Scene.WorkScene) || !LocalIsPrepOver)
             return false;
         foreach (var peer in PlayerManager.Peers.Values) peer.IsPrepOver = true;
-        PhaseReadyAction.Send(ReadyType.PrepOver, allReady: true);
+        PrepAllReadyAction.Broadcast();
         CommandScheduler.EnqueueWithNoCondition(IzakayaConfigPannelPatch.PrepOver);
         return true;
     }

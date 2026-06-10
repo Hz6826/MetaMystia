@@ -82,7 +82,7 @@ public partial class DaySceneManagerPatch
         }
 
         InGameConsole.ShowPassive(TextId.MystiaReadyForWork.Get());
-        PhaseReadyAction.Send(ReadyType.DayOver);
+        DayReadyAction.SendReady();
         MpManager.DayOver();
         return SkipOriginal;
     }
