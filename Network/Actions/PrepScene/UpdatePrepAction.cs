@@ -22,6 +22,23 @@ public partial class UpdatePrepAction : Action
         public Dictionary<int, long> BeverageDeletions { get; set; } = [];
 
         public CookerSlot[] Cookers { get; set; } = CookerSlot.CreateDefaultArray();
+
+        public Table Clone()
+        {
+            var cookers = Cookers ?? CookerSlot.CreateDefaultArray();
+            var clonedCookers = new CookerSlot[cookers.Length];
+            for (int i = 0; i < cookers.Length; i++)
+                clonedCookers[i] = cookers[i]?.Clone() ?? new CookerSlot();
+
+            return new Table
+            {
+                RecipeAdditions = new Dictionary<int, long>(RecipeAdditions),
+                RecipeDeletions = new Dictionary<int, long>(RecipeDeletions),
+                BeverageAdditions = new Dictionary<int, long>(BeverageAdditions),
+                BeverageDeletions = new Dictionary<int, long>(BeverageDeletions),
+                Cookers = clonedCookers,
+            };
+        }
     }
 
     public Table PrepTable { get; set; } = new Table();

@@ -17,14 +17,9 @@ public static partial class PrepSceneManager
     public static readonly int MaxRecipes = 8;
     public static readonly int MaxBeverages = 8;
     public static readonly int MaxCookers = 8; // 可信联机下双方都不会越界
-    public static bool localPlayerReady = false;
-    public static bool remotePlayerReady = false;
 
     public static void Initialize()
     {
-        localPlayerReady = false;
-        remotePlayerReady = false;
-
         if (!MpManager.IsConnected)
         {
             return;
@@ -33,6 +28,16 @@ public static partial class PrepSceneManager
     }
 
     public static void ClearPrepTable() => localPrepTable = new UpdatePrepAction.Table();
+
+    public static UpdatePrepAction.Table GetLocalPrepTableSnapshot() => localPrepTable.Clone();
+
+    /// <summary>客机：放弃本地备菜修改，强制应用主机权威表。</summary>
+    public static void ApplyHostTable(UpdatePrepAction.Table hostTable)
+    {
+        localPrepTable = hostTable?.Clone() ?? new UpdatePrepAction.Table();
+        Log.LogInfo("Applied authoritative prep table from host.");
+        UpdateAll();
+    }
 
     public static void MergeFromPeer(UpdatePrepAction.Table remotePrepTable)
     {
@@ -307,14 +312,14 @@ public static partial class PrepSceneManager
 
         Log.LogInfo($"Updated cookersList with {activeCount} active slots (limit {usableLength}).");
     }
-
-
+    
     public static void UpdateGroups()
     {
         UpdateRecipes();
         UpdateBeverages();
         UpdateCookers();
     }
+    
     public static void UpdateUI()
     {
         IzakayaConfigPannelPatch.instanceRef?.SolveDailyCompletion();
@@ -323,20 +328,9 @@ public static partial class PrepSceneManager
         IzakayaConfigPannelPatch.instanceRef?.m_RecipeGroup?.UpdateGroupRaw();
     }
 
-    public static void ClearGroups()
-    {
-        GameData.RunTime.NightSceneUtility.IzakayaConfigure.Instance.DailyRecipes.Clear();
-        GameData.RunTime.NightSceneUtility.IzakayaConfigure.Instance.DailyBeverages.Clear();
-        // GameData.RunTime.NightSceneUtility.IzakayaConfigure.Instance.CookerConfigure.Clear();
-        // System.ExecutionEngineException: Attempting to call method 'UnityEngine.InputSystem.Utilities.ArrayHelpers::Clear<System.Int32>' for which no ahead of time (AOT) code was generated.
-    }
-
     public static void UpdateAll()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            UpdateGroups();
-            UpdateUI();
-        });
+        UpdateGroups();
+        UpdateUI();
     }
 }
