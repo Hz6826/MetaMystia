@@ -38,10 +38,10 @@ public static partial class PlayerManager
         Peers.TryGetValue(uid, out peer) || PublicPeers.TryGetValue(uid, out peer);
 
     /// <summary>
-    /// 根据 UID 获取对端玩家名字，找不到则返回 "uid={uid}"
+    /// 根据 UID 获取对端玩家显示名（直播模式下为 UID-{uid}）
     /// </summary>
     public static string GetPeerName(int uid) =>
-        TryGetVisiblePeer(uid, out var peer) ? peer.Id : $"uid={uid}";
+        LiveModeManager.GetDisplayName(uid);
 
     #region Local 便捷属性
 
@@ -133,9 +133,9 @@ public static partial class PlayerManager
         foreach (var peer in Peers.Values)
         {
             if (string.IsNullOrEmpty(peer.IzakayaMapLabel) || peer.IzakayaLevel == 0)
-                return $"{peer.Id}: 未选择";
+                return $"{LiveModeManager.GetDisplayName(peer.Uid)}: 未选择";
             if (peer.IzakayaMapLabel != mapLabel || peer.IzakayaLevel != level)
-                return $"{peer.Id}: {Utils.GetMapLabelNameCN(peer.IzakayaMapLabel)} {Utils.GetMapLevelNameCN(peer.IzakayaLevel)}";
+                return $"{LiveModeManager.GetDisplayName(peer.Uid)}: {Utils.GetMapLabelNameCN(peer.IzakayaMapLabel)} {Utils.GetMapLevelNameCN(peer.IzakayaLevel)}";
         }
         return null;
     }
@@ -207,7 +207,8 @@ public static partial class PlayerManager
         // 为本地玩家也添加头顶标签（等 Local unit 初始化后）
         SgrYuki.CommandScheduler.Enqueue(
             executeWhen: () => Local.unit != null,
-            execute: () => UI.FloatingTextHelper.SetPlayerLabel(Local.Uid, Local.Id, Local.unit.transform),
+            execute: () => UI.FloatingTextHelper.SetPlayerLabel(
+                Local.Uid, LiveModeManager.GetDisplayName(Local.Uid), Local.unit.transform),
             timeoutSeconds: 30
         );
         Log.LogInfo($"PlayerManager peers spawned (peers: {Peers.Count})");

@@ -71,7 +71,7 @@ public partial class HelloAckAction : Action
         }
 
         MpWire.OnHandshakeComplete(HostInfo.PeerId);
-        InGameConsole.ShowPassiveFromAnyThread(TextId.MpConnected.Get(HostInfo.PeerId));
+        InGameConsole.ShowPassiveFromAnyThread(TextId.MpConnected.Get(LiveModeManager.GetDisplayName(HostInfo.Uid)));
     }
 
     /// <summary>

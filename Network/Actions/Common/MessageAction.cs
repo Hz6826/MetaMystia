@@ -24,10 +24,12 @@ public partial class MessageAction : Action
     {
         var senderName = PlayerManager.GetPeerName(SenderUid);
         InGameConsole.AddPeerMessage(senderName, Message);
-        if (PlayerManager.TryGetVisiblePeer(SenderUid, out var senderPeer)
+        if (!LiveModeManager.SuppressFloatingChatBubbles
+            && PlayerManager.TryGetVisiblePeer(SenderUid, out var senderPeer)
             && PlayerManager.LocalMapLabel == senderPeer.MapLabel)
         {
-            FloatingTextHelper.ShowFloatingTextOnMainThread(senderPeer.GetCharacterUnit(), Message);
+            FloatingTextHelper.ShowFloatingTextOnMainThread(
+                senderPeer.GetCharacterUnit(), LiveModeManager.MaskMessage(Message));
         }
     }
     private static MessageAction CreateMsgAction(string msg)
@@ -44,7 +46,8 @@ public partial class MessageAction : Action
 
     public static void Send(string message)
     {
-        FloatingTextHelper.ShowFloatingTextSelfOnMainThread(message);
+        if (!LiveModeManager.SuppressFloatingChatBubbles)
+            FloatingTextHelper.ShowFloatingTextSelfOnMainThread(LiveModeManager.MaskMessage(message));
         CreateMsgAction(message).Send();
     }
 }

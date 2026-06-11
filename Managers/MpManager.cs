@@ -201,7 +201,11 @@ public static partial class MpManager
             if (!IsRunning) return "Multiplayer: Off";
             if (IsConnected)
             {
-                var peerNames = string.Join(", ", PlayerManager.Peers.Values.Select(p => p.Id));
+                if (LiveModeManager.Mode == LiveMode.Partial)
+                    return $"MP: {RoleTag} | {AllPlayersCount}Players | ping {Latency}ms";
+
+                var peerNames = string.Join(", ",
+                    PlayerManager.Peers.Values.Select(p => LiveModeManager.GetDisplayName(p.Uid)));
                 return $"MP: {RoleTag} uid={PlayerManager.Local.Uid} | {AllPlayersCount}Players | ping {Latency}ms | {peerNames}";
             }
             return $"MP: {RoleName} (not connected)";

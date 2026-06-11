@@ -202,7 +202,10 @@ public static partial class PlayerListPanel
 
         string selfTag = isSelf ? " <color=#66FF88>★</color>" : "";
         string suffix = string.IsNullOrEmpty(scopeTag) ? "" : $" <color={ColorToHex(DimColor)}>{scopeTag}</color>";
-        string name = $"<color={nameColor}>[{uid}] {id}</color>{selfTag}{suffix}";
+        string displayId = LiveModeManager.GetDisplayName(uid);
+        string name = LiveModeManager.IsActive
+            ? $"<color={nameColor}>{displayId}</color>{selfTag}{suffix}"
+            : $"<color={nameColor}>[{uid}] {id}</color>{selfTag}{suffix}";
         string dim = ColorToHex(DimColor);
 
         return scene switch

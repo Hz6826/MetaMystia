@@ -15,8 +15,7 @@ public partial class DayReadyAction : Action
     {
         PlayerManager.SetPeerDayOver(SenderUid);
         MpManager.DayOver();
-        PlayerManager.Peers.TryGetValue(SenderUid, out var peer);
-        InGameConsole.ShowPassive(TextId.ReadyForWork.Get(peer?.Id ?? "???"));
+        InGameConsole.ShowPassive(TextId.ReadyForWork.Get(LiveModeManager.GetDisplayName(SenderUid)));
     }
 
     public static void SendReady() => new DayReadyAction().Send();

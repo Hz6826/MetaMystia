@@ -171,7 +171,7 @@ public partial class PeerPlayer : NetPlayer
         TryAddHeightProcessor();
         IgnoreCollisionWithSelf();
         UpdateVisibleState(visible);
-        FloatingTextHelper.SetPlayerLabel(Uid, Id, unit.transform);
+        FloatingTextHelper.SetPlayerLabel(Uid, LiveModeManager.GetDisplayName(Uid), unit.transform);
         Skin.ApplyToUnit(unit);
         Log.LogMessage($"PeerPlayer '{CharacterId}' post-spawn setup done (visible={visible})");
     }

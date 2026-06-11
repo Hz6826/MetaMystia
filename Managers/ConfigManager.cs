@@ -14,6 +14,16 @@ public enum RequestEnableMode
     ForceEnable      // 强制启用
 }
 
+/// <summary>
+/// 直播模式：全关、半开（遮 ID + 不可信区提示）、全开（遮 ID + 消息星号）
+/// </summary>
+public enum LiveMode
+{
+    Off,
+    Partial,
+    Full
+}
+
 
 
 [AutoLog]
@@ -52,6 +62,7 @@ public static partial class ConfigManager
     public static ConfigEntry<KeyCode> KeyToggleStatus;
     public static ConfigEntry<KeyCode> KeyOpenCommand;
     public static ConfigEntry<KeyCode> KeyOpenChat;
+    public static ConfigEntry<LiveMode> LiveStreamingMode;
 
     public static void InitConfigs()
     {
@@ -137,6 +148,10 @@ public static partial class ConfigManager
             "Key to open command console (with '/' prefix)\n打开命令控制台的按键（带 '/' 前缀）");
         KeyOpenChat = Config.Bind("Keybinds", "OpenChat", KeyCode.T,
             "Key to open chat\n打开聊天的按键");
+
+        LiveStreamingMode = Config.Bind("General", "LiveMode", LiveMode.Off,
+            "Live streaming privacy mode\n直播隐私模式\n" +
+            "Off: disabled | Partial: mask player IDs, show untrusted zone outline | Full: mask IDs and chat text");
     }
 
     public static string GetPlayerId()

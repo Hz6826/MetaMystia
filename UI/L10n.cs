@@ -270,6 +270,16 @@ public enum TextId
     MpIpv6Restarted,
     MpIpv6RejectConnected,
     MpDescIpv6,
+
+    // Live streaming mode
+    CmdDescLive,
+    LiveUsage,
+    LiveEmergencyFull,
+    LiveInvalidMode,
+    LiveModeOff,
+    LiveModePartial,
+    LiveModeFull,
+    LivePartialReminder,
 }
 
 public static class L10n

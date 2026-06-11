@@ -64,6 +64,7 @@ public static class GeneralCommands
         ["enable_bepin_console"] = TextId.CmdDescEnableBepinConsole,
         ["link"] = TextId.CmdDescLink,
         ["resourceex"] = TextId.CmdDescResourceEx,
+        ["live"] = TextId.CmdDescLive,
     };
 
     private static void HelpHandler(InvocationContext ctx)

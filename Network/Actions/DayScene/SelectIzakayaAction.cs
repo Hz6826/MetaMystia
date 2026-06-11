@@ -20,8 +20,7 @@ public partial class SelectIzakayaAction : Action
         {
             PlayerManager.SetPeerIzakayaSelection(SenderUid, MapLabel, MapLevel);
 
-            PlayerManager.Peers.TryGetValue(SenderUid, out var senderPeer);
-            var peerName = senderPeer?.Id ?? "???";
+            var peerName = LiveModeManager.GetDisplayName(SenderUid);
             InGameConsole.ShowPassive(TextId.PeerSelectedIzakaya.Get(
                 $"{peerName}", $"{Utils.GetMapLabelNameCN(MapLabel)} {Utils.GetMapLevelNameCN(MapLevel)}"));
 

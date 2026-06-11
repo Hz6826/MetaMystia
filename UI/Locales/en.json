@@ -198,5 +198,13 @@
     "MpIpv6Disabled": "IPv6 dual-stack listening disabled",
     "MpIpv6Restarted": "Server restarted to apply IPv6 setting",
     "MpIpv6RejectConnected": "Cannot change IPv6 setting while clients are connected, disconnect first",
-    "MpDescIpv6": "Enable or disable IPv6 dual-stack listening"
+    "MpDescIpv6": "Enable or disable IPv6 dual-stack listening",
+    "CmdDescLive": "Live streaming privacy mode (off / partial / full)",
+    "LiveUsage": "Usage: /live off | /live partial | /live full  —  /live alone enables full mode (emergency)",
+    "LiveEmergencyFull": "Live mode set to FULL (IDs and chat masked). Use /live off to disable live mode.",
+    "LiveInvalidMode": "Unknown live mode: {0}",
+    "LiveModeOff": "Live mode: OFF",
+    "LiveModePartial": "Live mode: PARTIAL (IDs masked, chat bar locked, untrusted zone outlined)",
+    "LiveModeFull": "Live mode: FULL (IDs and chat masked)",
+    "LivePartialReminder": "Live PARTIAL: chat area is not fully trusted — add a mosaic overlay in your streaming software. Chat bar position and size cannot be changed while live mode is on; use /live off to disable live mode if you need to adjust the chat bar."
 }

@@ -60,7 +60,8 @@ public partial class HelloAction : Action
         {
             Log.LogWarning($"Rejecting connection from '{PeerInfo.PeerId}' (uid={SenderUid}): " +
                 $"reconnection not allowed in {MpManager.LocalScene}");
-            InGameConsole.ShowPassiveFromAnyThread(TextId.PrepWorkReconnectBlocked.Get(PeerInfo.PeerId));
+            InGameConsole.ShowPassiveFromAnyThread(TextId.PrepWorkReconnectBlocked.Get(
+                LiveModeManager.GetDisplayName(SenderUid, PeerInfo.PeerId)));
             RejectAction.SendAndDisconnect(SenderUid, TextId.PrepWorkReconnectBlocked, PeerInfo.PeerId);
             return;
         }
@@ -73,7 +74,7 @@ public partial class HelloAction : Action
             RejectAction.SendAndDisconnect(SenderUid,
                 TextId.RoomFull, MpManager.AllPlayersCount.ToString(), ConfigManager.MaxPlayers.Value.ToString());
             InGameConsole.ShowPassiveFromAnyThread(TextId.RoomFullHostNotify.Get(
-                PeerInfo.PeerId, MpManager.AllPlayersCount, ConfigManager.MaxPlayers.Value));
+                LiveModeManager.GetDisplayName(SenderUid, PeerInfo.PeerId), MpManager.AllPlayersCount, ConfigManager.MaxPlayers.Value));
             return;
         }
 
@@ -91,7 +92,8 @@ public partial class HelloAction : Action
             Log.LogWarning($"Rejecting connection from '{PeerInfo.PeerId}' (uid={SenderUid}): " +
                 $"duplicate PeerId already online");
             RejectAction.SendAndDisconnect(SenderUid, TextId.DuplicatePeerId, PeerInfo.PeerId);
-            InGameConsole.ShowPassiveFromAnyThread(TextId.DuplicatePeerIdHostNotify.Get(PeerInfo.PeerId));
+            InGameConsole.ShowPassiveFromAnyThread(TextId.DuplicatePeerIdHostNotify.Get(
+                LiveModeManager.GetDisplayName(SenderUid, PeerInfo.PeerId)));
             return;
         }
 
@@ -114,7 +116,7 @@ public partial class HelloAction : Action
         // 启动同步
         MpWire.OnPeerHandshakeComplete(PeerInfo.Uid);
 
-        InGameConsole.ShowPassiveFromAnyThread(TextId.MpConnected.Get(PeerInfo.PeerId));
+        InGameConsole.ShowPassiveFromAnyThread(TextId.MpConnected.Get(LiveModeManager.GetDisplayName(PeerInfo.Uid)));
     }
 
     /// <summary>

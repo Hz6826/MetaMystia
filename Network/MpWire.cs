@@ -337,16 +337,19 @@ public static partial class MpWire
 
     private static void OnHostClientLeft(int uid)
     {
-        string peerId = null;
         if (PlayerManager.Peers.TryGetValue(uid, out var peer))
         {
-            peerId = peer.Id;
-            InGameConsole.ShowPassiveFromAnyThread(TextId.PeerLeft.Get(peerId));
+            var displayName = LiveModeManager.GetDisplayName(uid, peer.Id);
+            InGameConsole.ShowPassiveFromAnyThread(TextId.PeerLeft.Get(displayName));
             PeerLeaveAction.BroadcastPeerLeave(uid);
             PlayerManager.RemovePeer(uid);
+            MpManager.CheckContinueAfterDisconnect(uid, displayName);
+        }
+        else
+        {
+            MpManager.CheckContinueAfterDisconnect(uid, null);
         }
         if (PlayerManager.Peers.IsEmpty) CancelSync();
-        MpManager.CheckContinueAfterDisconnect(uid, peerId);
     }
 
     private static void OnClientDisconnected()

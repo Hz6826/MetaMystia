@@ -22,9 +22,10 @@ public partial class PlayerChangeIdAction : Action
         {
             var oldId = peer.Id;
             peer.Id = NewPlayerId;
-            InGameConsole.ShowPassiveFromAnyThread(TextId.PeerPlayerIdChanged.Get(oldId, NewPlayerId));
-            // 更新头顶浮动标签
-            FloatingTextHelper.UpdatePlayerLabel(SenderUid, NewPlayerId);
+            var oldDisplay = LiveModeManager.IsActive ? LiveModeManager.FormatUid(SenderUid) : oldId;
+            var newDisplay = LiveModeManager.IsActive ? LiveModeManager.FormatUid(SenderUid) : NewPlayerId;
+            InGameConsole.ShowPassiveFromAnyThread(TextId.PeerPlayerIdChanged.Get(oldDisplay, newDisplay));
+            FloatingTextHelper.UpdatePlayerLabel(SenderUid, LiveModeManager.GetDisplayName(SenderUid));
         }
     }
 
@@ -32,7 +33,7 @@ public partial class PlayerChangeIdAction : Action
     {
         // 更新本地玩家自己的头顶标签
         PlayerManager.Local.Id = newId;
-        FloatingTextHelper.UpdatePlayerLabel(PlayerManager.Local.Uid, newId);
+        FloatingTextHelper.UpdatePlayerLabel(PlayerManager.Local.Uid, LiveModeManager.GetDisplayName(PlayerManager.Local.Uid));
         new PlayerChangeIdAction { NewPlayerId = newId }.Send();
     }
 }

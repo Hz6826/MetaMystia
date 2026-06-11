@@ -21,7 +21,7 @@ public partial class PeerLeaveAction : Action
 
         if (PlayerManager.Peers.TryGetValue(PeerUid, out var peer))
         {
-            InGameConsole.ShowPassiveFromAnyThread(TextId.PeerLeft.Get(peer.Id));
+            InGameConsole.ShowPassiveFromAnyThread(TextId.PeerLeft.Get(LiveModeManager.GetDisplayName(PeerUid)));
             PlayerManager.RemovePeer(PeerUid);
         }
     }
