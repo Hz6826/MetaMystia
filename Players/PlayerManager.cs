@@ -308,40 +308,18 @@ public static partial class PlayerManager
     }
 
     /// <summary>
-    /// 隐藏指定对端玩家的角色（移到不可见层级）并移除头顶标签。
+    /// 销毁指定对端玩家的角色、取消 pending spawn，并移除头顶标签。
     /// 在移除 peer 之前调用，避免留下"幽灵"角色。
     /// </summary>
     public static void HidePeer(int uid)
     {
-        if (Peers.TryGetValue(uid, out var peer))
-        {
-            peer.UpdateVisibleState(false);
-        }
-        else if (PublicPeers.TryGetValue(uid, out peer))
-        {
-            peer.UpdateVisibleState(false);
-        }
+        if (Peers.TryGetValue(uid, out var peer) || PublicPeers.TryGetValue(uid, out peer))
+            peer.DespawnCharacter();
         UI.FloatingTextHelper.RemovePlayerLabel(uid);
     }
 
     /// <summary>
-    /// 隐藏所有对端玩家的角色和标签（客机断开连接时调用）
-    /// </summary>
-    public static void HideAllPeers()
-    {
-        foreach (var kvp in Peers)
-        {
-            kvp.Value.UpdateVisibleState(false);
-        }
-        foreach (var kvp in PublicPeers)
-        {
-            kvp.Value.UpdateVisibleState(false);
-        }
-        UI.FloatingTextHelper.ClearAllLabels();
-    }
-
-    /// <summary>
-    /// 移除一个对端玩家（先隐藏角色和标签）
+    /// 移除一个对端玩家（先销毁角色和标签）
     /// </summary>
     public static bool RemovePeer(int uid)
     {
@@ -360,21 +338,28 @@ public static partial class PlayerManager
     }
 
     /// <summary>
-    /// 清除所有对端玩家（先隐藏所有角色，断开连接时调用）
+    /// 清除所有对端玩家（先销毁所有角色并取消 pending spawn，断开连接时调用）
     /// </summary>
     public static void ClearPeers()
     {
-        HideAllPeers();
+        foreach (var peer in Peers.Values)
+            peer.DespawnCharacter();
+        foreach (var peer in PublicPeers.Values)
+            peer.DespawnCharacter();
+        UI.FloatingTextHelper.ClearAllLabels();
         Peers.Clear();
         PublicPeers.Clear();
         Log.LogMessage($"All peers cleared");
     }
 
+    /// <summary>
+    /// 清除房间内对端玩家（销毁角色、取消 pending spawn，并移除标签）
+    /// </summary>
     public static void ClearRoomPeers()
     {
         foreach (var kvp in Peers)
         {
-            kvp.Value.UpdateVisibleState(false);
+            kvp.Value.DespawnCharacter();
             UI.FloatingTextHelper.RemovePlayerLabel(kvp.Key);
         }
         Peers.Clear();

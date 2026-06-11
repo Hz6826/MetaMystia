@@ -132,6 +132,7 @@ public abstract partial class NetPlayer
     /// <param name="z"></param>
     public void SetZ(int z)
     {
+        if (rb2d == null) return;
         var pos = rb2d.transform.position;
         rb2d.transform.position = new Vector3(pos.x, pos.y, z);
     }
