@@ -51,6 +51,8 @@ public static partial class ConfigManager
     public static ConfigEntry<float> ConsoleWidth;
     public static ConfigEntry<float> ConsoleHeight;
     public static ConfigEntry<int> ConsoleFontSize;
+    public static ConfigEntry<float> ConsolePassiveLingerTime;
+    public static ConfigEntry<float> ConsolePassiveFadeTime;
 
     // Player list layout
     public static ConfigEntry<float> PlayerListX;
@@ -130,6 +132,12 @@ public static partial class ConfigManager
 
         ConsoleFontSize = Config.Bind("Console", "FontSize", 0,
             "Console font size (0 = auto based on screen height)\n控制台字体大小（0=根据屏幕高度自动）");
+
+        ConsolePassiveLingerTime = Config.Bind("Console", "PassiveLingerTime", 4f,
+            "Seconds before passive chat messages start fading out\n被动聊天消息开始淡出前的停留时间（秒）");
+
+        ConsolePassiveFadeTime = Config.Bind("Console", "PassiveFadeTime", 1f,
+            "Passive chat message fade-out duration in seconds\n被动聊天消息淡出动画时长（秒）");
 
         // Player list
         PlayerListX = Config.Bind("PlayerList", "X", 8f,

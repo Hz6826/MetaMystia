@@ -89,8 +89,8 @@ public static partial class InGameConsole
     // Passive mode config (Minecraft-style fade)
     // ====================================================================
     private const int PassiveMaxLines = 10;
-    private const float PassiveLingerTime = 4f;   // seconds before fade starts
-    private const float PassiveFadeTime = 1f;      // fade-out duration
+    private static float PassiveLingerTime => ConfigManager.ConsolePassiveLingerTime.Value;
+    private static float PassiveFadeTime => ConfigManager.ConsolePassiveFadeTime.Value;
 
     // ====================================================================
     // Layout constants
