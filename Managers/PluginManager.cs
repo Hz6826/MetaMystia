@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 using Il2CppInterop.Runtime;
+using BepInEx.Unity.IL2CPP.Utils;
 
 using Common.UI;
 
@@ -20,6 +22,8 @@ public partial class PluginManager : MonoBehaviour
     public static bool IsStatusVisible { get; private set; } = true;
     private readonly ConcurrentQueue<Action> _mainThreadQueue = new ConcurrentQueue<Action>();
     private readonly List<(Action action, Func<bool> condition)> _conditionalActions = new List<(Action, Func<bool>)>();
+    private Coroutine _interopRestartReminderCoroutine;
+    private string _interopRestartReminderText;
     public static bool DEBUG => ConfigManager.Debug.Value;
 
     public PluginManager(IntPtr ptr) : base(ptr)
@@ -47,6 +51,25 @@ public partial class PluginManager : MonoBehaviour
     {
         InGameConsole.Initialize();
         ResourceExManager.FlushPendingConsoleLogs();
+    }
+
+    public void StartInteropRestartReminder(string message)
+    {
+        _interopRestartReminderText = message;
+        if (_interopRestartReminderCoroutine != null)
+            return;
+
+        _interopRestartReminderCoroutine = MonoBehaviourExtensions.StartCoroutine(this, InteropRestartReminderLoop());
+    }
+
+    private IEnumerator InteropRestartReminderLoop()
+    {
+        var wait = new WaitForSeconds(3f);
+        while (true)
+        {
+            InGameConsole.LogAlert(_interopRestartReminderText);
+            yield return wait;
+        }
     }
 
     private void OnGUI()
@@ -145,5 +168,10 @@ public partial class PluginManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_interopRestartReminderCoroutine != null)
+        {
+            StopCoroutine(_interopRestartReminderCoroutine);
+            _interopRestartReminderCoroutine = null;
+        }
     }
 }

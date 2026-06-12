@@ -854,6 +854,10 @@ public static partial class InGameConsole
     public static void LogError(string text)
         => LogToConsole($"<color=#FF6666>{text}</color>");
 
+    /// <summary>Log a prominent red alert (large bold text).</summary>
+    public static void LogAlert(string text)
+        => LogToConsole($"<size=22><color=#FF4444><b>{text}</b></color></size>");
+
     private static void ExecuteCommand(string cmd, out bool closeConsole)
     {
         closeConsole = false;
