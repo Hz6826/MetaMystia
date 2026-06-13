@@ -1,4 +1,5 @@
-﻿using GameData.Core.Collections;
+using GameData.Core.Collections;
+using GameData.Core.Collections.CharacterUtility;
 using MetaMystia.Protocol.Enums;
 using MetaMystia.UI;
 using NightScene.EventUtility;
@@ -53,6 +54,11 @@ public static class EnumConverter
         => (ServeType)type;
     public static EventManager.ServeType ToGame(ServeType type)
         => (EventManager.ServeType)type;
+    // SkinSelectedType
+    public static SkinSelectedType ToProtocol(CharacterSkinSets.SelectedType type)
+        => (SkinSelectedType)(int)type;
+    public static CharacterSkinSets.SelectedType ToGame(SkinSelectedType type)
+        => (CharacterSkinSets.SelectedType)(int)type;
     // RejectReason <-> L10n TextId
     public static RejectReason ToProtocol(TextId textId)
     {

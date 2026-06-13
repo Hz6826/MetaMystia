@@ -12,6 +12,7 @@ using Common.UI;
 
 using MetaMystia.ConsoleSystem;
 using MetaMystia.Network;
+using MetaMystia.Network.Services;
 
 namespace MetaMystia.UI;
 
@@ -862,7 +863,10 @@ public static partial class InGameConsole
         // Command echo (disabled by default, kept for future use)
         const bool ShowCommandEcho = false;
         if (ShowCommandEcho)
+            #pragma warning disable CS0162 // 检测到不可到达的代码
+            // ReSharper disable once HeuristicUnreachableCode
             LogToConsole(TextId.CommandPrompt.Get(cmd));
+            #pragma warning restore CS0162 // 检测到不可到达的代码
 
         bool isMessage = cmd[0] != '/';
         if (isMessage)
@@ -872,7 +876,7 @@ public static partial class InGameConsole
             LogToConsole($"{localName}: {displayMsg}");
 
             if (MpManager.IsConnected)
-                MessageAction.Send(cmd);
+                CommonServices.SendChat(cmd);
 
             closeConsole = true;
         }
