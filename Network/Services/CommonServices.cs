@@ -29,7 +29,8 @@ public static class CommonServices
 
      public static void SendPlayerChangeSkin(PlayerSkinData skin)
      {
-         var msg = new PlayerChangeSkinMessage{Skin = skin};
+         var msg = new PlayerChangeSkinMessage { Skin = skin };
+         MpWire.Send(msg);
      }
 
     public static void SendSceneTransit(Scene scene)
