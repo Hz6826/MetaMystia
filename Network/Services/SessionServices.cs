@@ -35,11 +35,6 @@ public static class SessionServices
     }
 
     /// <summary>
-    /// 客机发送默认 Hello（作为 SendHello 的别名，用于连接流程）
-    /// </summary>
-    public static void SendHelloDefault() => SendHello();
-
-    /// <summary>
     /// 主机向指定客机发送 HelloAck（携带分配的 UID + 所有已有 peer 信息）
     /// </summary>
     public static void SendHelloAck(int clientUid)

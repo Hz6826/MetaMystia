@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using MetaMystia.Network.Handlers;
 using MetaMystia.Network.Services;
 using MetaMystia.Protocol.Messages;
 using MetaMystia.Protocol.Messages.Session;
@@ -138,7 +137,7 @@ public static partial class MpWire
             }
             Session.EnterDirectClientRoom();
             await Task.Run(() => _tcp.ConnectClient(host, port, ConnectTimeoutMs));
-            SessionServices.SendHelloDefault();
+            SessionServices.SendHello();
             Log.LogMessage($"[C] Connected to {host}:{port}");
             return true;
         }
@@ -188,6 +187,7 @@ public static partial class MpWire
     public static void Send(NetworkMessage message, bool lowPriority = false)
     {
         if (!CanSend) return;
+        message.SenderUid = PlayerManager.Local.Uid;  // FIXME: 临时的解决方案，以后可能会调整
         Utilities.LogUtils.LogMessageSent(message);
         EnqueueSend(message, lowPriority);
     }
