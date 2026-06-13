@@ -17,6 +17,9 @@ public static class PrepSceneServices
 
     public static void SendUpdatePrep()
     {
-        MpWire.Send(new UpdatePrepMessage());
+        MpWire.Send(new UpdatePrepMessage
+        {
+            PrepTableData = PrepSceneManager.GetLocalPrepTableSnapshot()
+        });
     }
 }

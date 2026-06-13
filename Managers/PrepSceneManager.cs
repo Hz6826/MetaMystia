@@ -42,6 +42,7 @@ public static partial class PrepSceneManager
 
     public static void MergeFromPeer(TableData remotePrepTable)
     {
+        if (remotePrepTable == null) return;
         bool changed = false;
 
         changed |= MergeDictionary(LocalPrepTable.RecipeAdditions, remotePrepTable.RecipeAdditions);

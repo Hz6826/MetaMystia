@@ -32,7 +32,7 @@ public static partial class PrepSceneHandlers
     [HandlerAttributes.CheckScene(Scene.IzakayaPrepScene)]
     public static void HandlePrepReady(PrepReadyMessage msg)
     {
-        PlayerManager.SetPeerDayOver(msg.SenderUid);
+        PlayerManager.SetPeerPrepOver(msg.SenderUid);
         MpManager.PrepOver();
         InGameConsole.ShowPassive(TextId.ReadyForWork.Get(LiveModeManager.GetDisplayName(msg.SenderUid)));
     }
