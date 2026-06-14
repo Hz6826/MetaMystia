@@ -31,8 +31,10 @@ public partial class WorkSceneServePannelPatch
     [HarmonyPostfix]
     public static void OnPanelOpen_Postfix(WorkSceneServePannel __instance)
     {
-        // isPanelOpen = true;
         instanceRef = __instance;
+        
+        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return;
+        
         var panelDeskCode = WorkSceneServePannelPatch.instanceRef?.currentGuestController?.DeskCode
                             ?? WorkSceneServePannelPatch.instanceRef?.operatingOrder?.DeskCode
                             ?? -1;
@@ -74,7 +76,7 @@ public partial class WorkSceneServePannelPatch
             return RunOriginal;
         }
 
-        if (MpManager.ShouldSkipAction) return RunOriginal;
+        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
         if (MpManager.IsRoomHost)
         {
             GuestFSM.OnConfirmServe(__instance.currentGuestController, __instance.willServeFood, __instance.willServeBeverage);
@@ -92,7 +94,7 @@ public partial class WorkSceneServePannelPatch
     [HarmonyPrefix]
     public static bool Send_Prefix(ref WorkSceneServePannel __instance, Sellable toSend)
     {
-        if (MpManager.ShouldSkipAction) return RunOriginal;
+        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
 
         if ((toSend.Type == Sellable.SellableType.Food && __instance.operatingOrder.ServFood != null) ||
             (toSend.Type == Sellable.SellableType.Beverage && __instance.operatingOrder.ServBeverage != null))
@@ -121,7 +123,7 @@ public partial class WorkSceneServePannelPatch
     [HarmonyPrefix]
     public static bool Cancel_Prefix(ref WorkSceneServePannel __instance, Sellable toCancel)
     {
-        if (MpManager.ShouldSkipAction) return RunOriginal;
+        if (MpManager.ShouldSkipAction || !MpManager.IsConnected) return RunOriginal;
 
         if ((toCancel.Type == Sellable.SellableType.Food && __instance.willServeFood == null) ||
             (toCancel.Type == Sellable.SellableType.Beverage && __instance.willServeBeverage == null) ||
