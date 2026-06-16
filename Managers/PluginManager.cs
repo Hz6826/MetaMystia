@@ -7,7 +7,7 @@ using Il2CppInterop.Runtime;
 using BepInEx.Unity.IL2CPP.Utils;
 
 using Common.UI;
-
+using Il2CppInterop.Runtime.Attributes;
 using MetaMystia.UI;
 using SgrYuki;
 
@@ -53,6 +53,7 @@ public partial class PluginManager : MonoBehaviour
         ResourceExManager.FlushPendingConsoleLogs();
     }
 
+    [HideFromIl2Cpp]
     public void StartInteropRestartReminder(string message)
     {
         _interopRestartReminderText = message;
@@ -62,6 +63,7 @@ public partial class PluginManager : MonoBehaviour
         _interopRestartReminderCoroutine = MonoBehaviourExtensions.StartCoroutine(this, InteropRestartReminderLoop());
     }
 
+    [HideFromIl2Cpp]
     private IEnumerator InteropRestartReminderLoop()
     {
         var wait = new WaitForSeconds(3f);
@@ -132,6 +134,7 @@ public partial class PluginManager : MonoBehaviour
         }
     }
 
+    [HideFromIl2Cpp]
     private void UpdateRunOnMainThreadQueue()
     {
         while (_mainThreadQueue.TryDequeue(out var action))
@@ -147,6 +150,7 @@ public partial class PluginManager : MonoBehaviour
         }
     }
 
+    [HideFromIl2Cpp]
     public void RunOnMainThread(Action action) => _mainThreadQueue.Enqueue(action);
 
     private void FixedUpdate()
