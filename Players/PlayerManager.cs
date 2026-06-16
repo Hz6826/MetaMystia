@@ -4,6 +4,7 @@ using UnityEngine;
 
 using Common.CharacterUtility;
 using MetaMystia.Network;
+using MetaMystia.UI;
 
 namespace MetaMystia;
 
@@ -45,7 +46,7 @@ public static partial class PlayerManager
 
     #region Local 便捷属性
 
-    public static string LocalMapLabel => LocalPlayer.MapLabel;
+    public static MapLabel LocalMapLabel => LocalPlayer.CurrentMapLabel;
     public static bool LocalIsSprinting { get => Local.IsSprinting; set => Local.IsSprinting = value; }
     public static Vector2 LocalInputDirection { get => Local.InputDirection; set => Local.InputDirection = value; }
     public static bool CharacterSpawnedAndInitialized => Local.CharacterSpawnedAndInitialized;
@@ -82,9 +83,9 @@ public static partial class PlayerManager
     /// <summary>
     /// 所有对端是否都已选择了与指定地图/等级一致的居酒屋
     /// </summary>
-    public static bool AllPeersSelectedSameIzakaya(string mapLabel, int level) =>
+    public static bool AllPeersSelectedSameIzakaya(MapLabel mapLabel, int level) =>
         Peers.Count > 0 && Peers.Values.All(p =>
-            !string.IsNullOrEmpty(p.IzakayaMapLabel) && p.IzakayaLevel != 0
+            p.IzakayaMapLabel.IsSelected() && p.IzakayaLevel != 0
             && p.IzakayaMapLabel == mapLabel && p.IzakayaLevel == level);
 
     /// <summary>
@@ -92,7 +93,7 @@ public static partial class PlayerManager
     /// </summary>
     public static bool AllPeersHaveSelected =>
         Peers.Count > 0 && Peers.Values.All(p =>
-            !string.IsNullOrEmpty(p.IzakayaMapLabel) && p.IzakayaLevel != 0);
+            p.IzakayaMapLabel.IsSelected() && p.IzakayaLevel != 0);
 
     #endregion
 
@@ -114,7 +115,7 @@ public static partial class PlayerManager
             Log.LogWarning($"SetPeerPrepOver: peer uid={uid} not found");
     }
 
-    public static void SetPeerIzakayaSelection(int uid, string mapLabel, int level)
+    public static void SetPeerIzakayaSelection(int uid, MapLabel mapLabel, int level)
     {
         if (Peers.TryGetValue(uid, out var peer))
         {
@@ -128,14 +129,14 @@ public static partial class PlayerManager
     /// <summary>
     /// 获取选择不一致的首个 Peer 的选择描述（用于通知），无不一致则返回 null
     /// </summary>
-    public static string GetFirstMismatchSelection(string mapLabel, int level)
+    public static string GetFirstMismatchSelection(MapLabel mapLabel, int level)
     {
         foreach (var peer in Peers.Values)
         {
-            if (string.IsNullOrEmpty(peer.IzakayaMapLabel) || peer.IzakayaLevel == 0)
-                return $"{LiveModeManager.GetDisplayName(peer.Uid)}: 未选择";
+            if (!peer.IzakayaMapLabel.IsSelected() || peer.IzakayaLevel == 0)
+                return $"{LiveModeManager.GetDisplayName(peer.Uid)}: {TextId.PeerIzakayaNotSelected.Get()}";
             if (peer.IzakayaMapLabel != mapLabel || peer.IzakayaLevel != level)
-                return $"{LiveModeManager.GetDisplayName(peer.Uid)}: {Utils.GetMapLabelNameCN(peer.IzakayaMapLabel)} {Utils.GetMapLevelNameCN(peer.IzakayaLevel)}";
+                return $"{LiveModeManager.GetDisplayName(peer.Uid)}: {peer.IzakayaMapLabel.FormatIzakayaSelection(peer.IzakayaLevel)}";
         }
         return null;
     }

@@ -27,7 +27,7 @@ public partial class PeerPlayer : NetPlayer
     /// </summary>
     public int CharacterModelId { get; set; } = 14;
 
-    public bool IsSameMapAsLocal => MapLabel == LocalPlayer.MapLabel;
+    public bool IsSameMapAsLocal => MapLabel == LocalPlayer.CurrentMapLabel;
 
     private string SpawnCommandKey => $"PeerSpawn_{CharacterId}";
 
@@ -285,7 +285,7 @@ public partial class PeerPlayer : NetPlayer
     /// <summary>
     /// DayScene 同步：接收对端的地图、奔跑、方向、位置
     /// </summary>
-    public void SyncFromPeer(string mapLabel, bool isSprinting, float speed, Vector2 inputDirection, Vector2 position)
+    public void SyncFromPeer(MapLabel mapLabel, bool isSprinting, float speed, Vector2 inputDirection, Vector2 position)
     {
         if (unit == null)
         {

@@ -12,7 +12,7 @@ namespace MetaMystia.Network;
 [RoomRelay]
 public partial class SelectIzakayaAction : Action
 {
-    public string MapLabel { get; set; } = "";
+    public MapLabel MapLabel { get; set; }
     public int MapLevel { get; set; } = 0;
     public override void OnReceivedDerived()
     {
@@ -22,7 +22,7 @@ public partial class SelectIzakayaAction : Action
 
             var peerName = LiveModeManager.GetDisplayName(SenderUid);
             InGameConsole.ShowPassive(TextId.PeerSelectedIzakaya.Get(
-                $"{peerName}", $"{Utils.GetMapLabelNameCN(MapLabel)} {Utils.GetMapLevelNameCN(MapLevel)}"));
+                $"{peerName}", MapLabel.FormatIzakayaSelection(MapLevel)));
 
             if (MpManager.IsServer)
             {
@@ -37,7 +37,7 @@ public partial class SelectIzakayaAction : Action
         });
     }
 
-    public static void Send(string mapLabel, int level)
+    public static void Send(MapLabel mapLabel, int level)
     {
         new SelectIzakayaAction
         {

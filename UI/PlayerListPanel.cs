@@ -144,7 +144,7 @@ public static partial class PlayerListPanel
         var local = PlayerManager.Local;
         string localLine = FormatPlayer(
             local.Uid, local.Id, scene,
-            needsGameplayData ? PlayerManager.LocalMapLabel : "",
+            needsGameplayData ? PlayerManager.LocalMapLabel : MapLabel.Unknown,
             needsGameplayData ? local.Position : Vector2.zero,
             local.IsDayOver, local.IsPrepOver,
             local.IzakayaMapLabel, local.IzakayaLevel,
@@ -158,7 +158,7 @@ public static partial class PlayerListPanel
             var peer = kvp.Value;
             string line = FormatPlayer(
                 peer.Uid, peer.Id, scene,
-                needsGameplayData ? peer.MapLabel : "",
+                needsGameplayData ? peer.MapLabel : MapLabel.Unknown,
                 needsGameplayData ? peer.Position : Vector2.zero,
                 peer.IsDayOver, peer.IsPrepOver,
                 peer.IzakayaMapLabel, peer.IzakayaLevel,
@@ -173,7 +173,7 @@ public static partial class PlayerListPanel
             var peer = kvp.Value;
             string line = FormatPlayer(
                 peer.Uid, peer.Id, scene,
-                needsGameplayData ? peer.MapLabel : "",
+                needsGameplayData ? peer.MapLabel : MapLabel.Unknown,
                 needsGameplayData ? peer.Position : Vector2.zero,
                 peer.IsDayOver, peer.IsPrepOver,
                 peer.IzakayaMapLabel, peer.IzakayaLevel,
@@ -187,9 +187,9 @@ public static partial class PlayerListPanel
 
     private static string FormatPlayer(
         int uid, string id, Scene scene,
-        string mapLabel, Vector2 pos,
+        MapLabel mapLabel, Vector2 pos,
         bool isDayOver, bool isPrepOver,
-        string izakayaMapLabel, int izakayaLevel,
+        MapLabel izakayaMapLabel, int izakayaLevel,
         bool isSelf, bool isHost,
         string scopeTag = null)
     {
@@ -221,17 +221,17 @@ public static partial class PlayerListPanel
     /// DayScene: 全员 DayOver 后显示选店信息，否则显示地图+坐标+状态
     /// </summary>
     private static string FormatDayLine(string name, string dim,
-        string mapLabel, Vector2 pos, bool isDayOver,
-        string izakayaMapLabel, int izakayaLevel)
+        MapLabel mapLabel, Vector2 pos, bool isDayOver,
+        MapLabel izakayaMapLabel, int izakayaLevel)
     {
         if (!PlayerManager.AllDayOver)
         {
             // 仍在白天探索
-            return $"{name}  <color={dim}>{Utils.GetMapLabelNameCN(mapLabel)}  ({pos.x:F2}, {pos.y:F2})  {ReadyTag(isDayOver)}</color>";
+            return $"{name}  <color={dim}>{mapLabel.GetDisplayName()}  ({pos.x:F2}, {pos.y:F2})  {ReadyTag(isDayOver)}</color>";
         }
         // 全员进入选店
-        string map = !string.IsNullOrEmpty(izakayaMapLabel)
-            ? Utils.GetMapLabelNameCN(izakayaMapLabel) : "…";
+        string map = izakayaMapLabel.IsSelected()
+            ? izakayaMapLabel.GetDisplayName() : "…";
         string level = izakayaLevel > 0 ? $" Lv.{izakayaLevel}" : "";
         return $"{name}  <color={dim}>{map}{level}</color>";
     }

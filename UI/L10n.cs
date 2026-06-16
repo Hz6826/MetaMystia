@@ -128,6 +128,38 @@ public enum TextId
     MystiaPosition,
     UnknownField,
 
+    // Map labels
+    MapLabel_Unknown,
+    MapLabel_Home,
+    MapLabel_Basement,
+    MapLabel_BeastForest,
+    MapLabel_HumanVillage,
+    MapLabel_HakureiShrine,
+    MapLabel_ScarletMansion,
+    MapLabel_BambooForest,
+    MapLabel_PartyStage,
+    MapLabel_Hakugyokurou,
+    MapLabel_DLC1_MagicForest,
+    MapLabel_DLC1_YoukaiMountain,
+    MapLabel_DLC2_FormerHell,
+    MapLabel_DLC2_EarthSpiritsPalace,
+    MapLabel_DLC3_MyourenTemple,
+    MapLabel_DLC3_DivineSpiritMausoleum,
+    MapLabel_DLC3_HakureiFestival,
+    MapLabel_DLC4_GardenOfTheSun,
+    MapLabel_DLC4_ShiningNeedleCastle,
+    MapLabel_DLC4_ScarletMansionBasement,
+    MapLabel_DLC5_Makai,
+    MapLabel_DLC5_LunarCapital,
+
+    // Izakaya map levels
+    MapLevel_Cart,
+    MapLevel_Cabin,
+    MapLevel_Izakaya,
+    MapLevel_Unknown,
+    PeerIzakayaNotSelected,
+    InvalidMapKey,
+
     // Console Error Messages
     UnknownCommand,
     UnknownMethod,

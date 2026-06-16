@@ -18,7 +18,7 @@ public partial class MoveSyncAction : Action
     public float Py { get; set; }
     public bool IsSprinting { get; set; }
     public float Speed { get; set; }
-    public string MapLabel { get; set; }
+    public MapLabel MapLabel { get; set; }
 
     protected override BepInEx.Logging.LogLevel OnReceiveLogLevel => BepInEx.Logging.LogLevel.Debug;
     protected override BepInEx.Logging.LogLevel OnSendLogLevel => BepInEx.Logging.LogLevel.Debug;

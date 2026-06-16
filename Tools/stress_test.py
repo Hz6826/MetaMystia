@@ -105,6 +105,30 @@ def timestamp_now_ms() -> int:
 # ActionType 枚举 (C# ushort)
 # ═══════════════════════════════════════════════════════════════
 
+class MapLabel:
+    Unknown = 0
+    Home = 1
+    Basement = 2
+    BeastForest = 3
+    HumanVillage = 4
+    HakureiShrine = 5
+    ScarletMansion = 6
+    BambooForest = 7
+    PartyStage = 8
+    Hakugyokurou = 9
+    DLC1_MagicForest = 10
+    DLC1_YoukaiMountain = 11
+    DLC2_FormerHell = 12
+    DLC2_EarthSpiritsPalace = 13
+    DLC3_MyourenTemple = 14
+    DLC3_DivineSpiritMausoleum = 15
+    DLC3_HakureiFestival = 16
+    DLC4_GardenOfTheSun = 17
+    DLC4_ShiningNeedleCastle = 18
+    DLC4_ScarletMansionBasement = 19
+    DLC5_Makai = 20
+    DLC5_LunarCapital = 21
+
 class ActionType:
     PING            = 0
     PONG            = 1
@@ -241,7 +265,7 @@ def build_scene_transit_action(scene: int, sender_uid: int = 0) -> bytes:
 
 def build_sync_action(px: float, py: float, vx: float = 0.0, vy: float = 0.0,
                       is_sprinting: bool = False, speed: float = 1.0,
-                      map_label: str = "HumanVillage",
+                      map_label: int = MapLabel.HumanVillage,
                       sender_uid: int = 0) -> bytes:
     """
     SyncAction (ActionType.SYNC = 8) 字段：
@@ -253,7 +277,7 @@ def build_sync_action(px: float, py: float, vx: float = 0.0, vy: float = 0.0,
       6. Py           (float)
       7. IsSprinting  (bool)
       8. Speed        (float)
-      9. MapLabel     (string)
+      9. MapLabel     (MapLabel enum / ushort)
 
     总字段数 = 9
     """
@@ -267,7 +291,7 @@ def build_sync_action(px: float, py: float, vx: float = 0.0, vy: float = 0.0,
         mp_float(py) +
         mp_bool(is_sprinting) +
         mp_float(speed) +
-        mp_string(map_label)
+        mp_uint16(map_label)
     )
     return mp_union_tag(ActionType.SYNC) + body
 
@@ -456,7 +480,7 @@ class FakeClient:
                     px=px, py=py, vx=vx, vy=vy,
                     is_sprinting=random.random() > 0.8,
                     speed=1.0,
-                    map_label="HumanVillage",
+                    map_label=MapLabel.HumanVillage,
                     sender_uid=self.assigned_uid
                 )
                 send_action(self.tube, action, client=self)

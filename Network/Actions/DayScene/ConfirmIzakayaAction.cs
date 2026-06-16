@@ -14,14 +14,14 @@ namespace MetaMystia.Network;
 [AutoLog]
 public partial class ConfirmIzakayaAction : Action
 {
-    public string MapLabel { get; set; } = "";
+    public MapLabel MapLabel { get; set; }
     public int MapLevel { get; set; } = 0;
 
     public override void OnReceivedDerived()
     {
         PluginManager.Instance.RunOnMainThread(() =>
         {
-            var display = $"{Utils.GetMapLabelNameCN(MapLabel)} {Utils.GetMapLevelNameCN(MapLevel)}";
+            var display = MapLabel.FormatIzakayaSelection(MapLevel);
             InGameConsole.ShowPassive(TextId.SelectedIzakaya.Get(display));
 
             IzakayaSelectorPanelPatch.TryProceedWithConfirmedSelection(MapLabel, (IzakayaLevel)MapLevel);
@@ -31,7 +31,7 @@ public partial class ConfirmIzakayaAction : Action
     /// <summary>
     /// 主机广播确认选店
     /// </summary>
-    public static void Broadcast(string mapLabel, int mapLevel)
+    public static void Broadcast(MapLabel mapLabel, int mapLevel)
     {
         var action = new ConfirmIzakayaAction
         {
