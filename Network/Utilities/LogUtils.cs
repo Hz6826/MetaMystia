@@ -19,7 +19,7 @@ public static partial class LogUtils
 
     public static string ToLogString(this NetworkMessage message)
     {
-        return JsonSerializer.Serialize(message, _jsonSerializerOptions);
+        return JsonSerializer.Serialize(message, message.GetType(), _jsonSerializerOptions);
     }
 
     private static void LogMessageInternal(string logStr, MessageLogLevel logLevel)
