@@ -863,11 +863,6 @@ public static partial class InGameConsole
         closeConsole = false;
         Log.LogMessage($"Console Command: {cmd}");
 
-        // Command echo (disabled by default, kept for future use)
-        const bool ShowCommandEcho = false;
-        if (ShowCommandEcho)
-            LogToConsole(TextId.CommandPrompt.Get(cmd));
-
         bool isMessage = cmd[0] != '/';
         if (isMessage)
         {

@@ -76,8 +76,6 @@ public partial class PlayerSkin
     /// </summary>
     public CharacterPortrayal ResolveSpecialPortrait()
     {
-        CharacterProtrayalSet set;
-
         if (DataBaseCharacter.SpecialGuestVisual.ContainsKey(CharacterId))
         {
             return DataBaseCharacter.SpecialGuestVisual[CharacterId]?.CharacterPortrayal?.defaultPortrayal;
