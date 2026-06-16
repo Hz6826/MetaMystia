@@ -193,15 +193,16 @@ public class DialogPackageConfig
     public int Count => dialogList?.Count ?? 0;
 
     public DialogConfig this[int index] => dialogList[index];
+}
 
-    public System.Action<Il2CppSystem.Collections.Generic.Dictionary<int, string>> GetOverrideReplaceTextCallback()
-    {
-        return replaceDict =>
-        {
-            for (int i = 0; i < Count; i++)
-                replaceDict[i] = this[i].text;
-        };
-    }
+public class DialogBranchOptionConfig
+{
+    public string text { get; set; }
+    /// <summary>
+    /// One-based dialog number; Count + 1 means finish this dialog package.
+    /// </summary>
+    public int jump { get; set; }
+    public int? price { get; set; }
 }
 
 public class DialogActionConfig
@@ -218,6 +219,22 @@ public class DialogActionConfig
     /// For Sound actions: relative path or rex URI to a WAV asset.
     /// </summary>
     public string sound { get; set; }
+
+    /// <summary>
+    /// For Branch actions: option text, target dialog index, and optional price.
+    /// Jump values are one-based dialog numbers; dialogList.Count + 1 means finish this dialog package.
+    /// </summary>
+    public List<DialogBranchOptionConfig> options { get; set; }
+
+    /// <summary>
+    /// For Goto actions: one-based dialog number; dialogList.Count + 1 means finish this dialog package.
+    /// </summary>
+    public int? index { get; set; }
+
+    /// <summary>
+    /// For End actions: optional native dialog exit code. Normal dialog menus can leave this as 0.
+    /// </summary>
+    public int? exitCode { get; set; }
 
     public bool shouldSet { get; set; } = true;
 }
