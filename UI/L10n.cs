@@ -197,6 +197,7 @@ public enum TextId
     CallDescTryCloseIzakaya,
     SkinDescSet,
     SkinDescNet,
+    SkinDescRot,
     SkinDescOff,
     SkinDescList,
 
@@ -211,6 +212,9 @@ public enum TextId
     SkinMsgNetRefreshNoSkin,
     SkinMsgNetLoaded,
     SkinMsgNetFailed,
+    SkinMsgRotOn,
+    SkinMsgRotOff,
+    SkinMsgRotClear,
 
     // Console startup & link
     ConsoleStarPrompt,
