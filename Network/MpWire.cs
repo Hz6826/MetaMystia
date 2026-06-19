@@ -184,16 +184,9 @@ public static partial class MpWire
     {
         if (!CanSend) return;
 
-        var packet = NetPacket.FromSingleAction(action);
-        var framed = packet.ToBytesWithLength();
+        var framed = NetPacket.FromAction(action).ToBytesWithLength();
         int? target = action.WireTargetUid;
         int? except = action.WireExceptUid;
-
-        if (Session.TransportKind == TransportKind.RelayClient)
-        {
-            Log.LogWarning("[MpWire] Relay send not implemented");
-            return;
-        }
 
         if (Session.IsRoomHost)
             _outbox.Enqueue(new Outbound(framed, target, except, lowPriority));
@@ -281,29 +274,24 @@ public static partial class MpWire
     {
         int id = Interlocked.Increment(ref _pingId);
         _pingSent[id] = NowMs;
-        var action = new PingAction { Id = id };
-        var framed = NetPacket.FromSingleAction(action).ToBytesWithLength();
-        if (Session.IsRoomHost)
-            _tcp?.Enqueue(null, null, framed, false);
-        else
-            _tcp?.Enqueue(null, null, framed, false);
+        var framed = NetPacket.FromAction(new PingAction { Id = id }).ToBytesWithLength();
+        _tcp?.Enqueue(null, null, framed, false);
     }
 
     // 反序列化已在 PacketBuffer（IO 线程）。主机转发与出站共用 ToBytesWithLength，避免维护第二套组帧逻辑。
     private static void OnWirePacket(int fromUid, NetPacket packet)
     {
-        var actions = packet.Actions;
-        if (actions.Length == 0) return;
+        var action = packet.Action;
+        if (action == null) return;
 
-        if (Session.IsRoomHost && fromUid != MpConstants.HostUid && ShouldRelay(actions[0]))
+        if (Session.IsRoomHost && fromUid != MpConstants.HostUid && ShouldRelay(action))
         {
-            actions[0].SenderUid = fromUid;
+            action.SenderUid = fromUid;
             _outbox.Enqueue(new Outbound(
-                NetPacket.FromSingleAction(actions[0]).ToBytesWithLength(), null, fromUid, false));
+                NetPacket.FromAction(action).ToBytesWithLength(), null, fromUid, false));
         }
 
-        foreach (var action in actions)
-            _inbox.Enqueue(new Inbound(fromUid, action));
+        _inbox.Enqueue(new Inbound(fromUid, action));
     }
 
     private static void OnWirePeerLeft(int uid)

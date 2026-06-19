@@ -7,10 +7,11 @@ using MemoryPack;
 
 namespace MetaMystia.Network;
 
+/// <summary>线层信封：每帧恰好承载一个 <see cref="Action"/>。</summary>
 [MemoryPackable]
 public partial class NetPacket
 {
-    public Action[] Actions { get; set; } = [];
+    public Action Action { get; set; }
 
     public byte[] ToBytesWithLength()
     {
@@ -24,12 +25,9 @@ public partial class NetPacket
     public static NetPacket FromBytes(byte[] data) =>
         MemoryPackSerializer.Deserialize<NetPacket>(data)!;
 
-    public Action GetFirstAction() =>
-        Actions.Length > 0 ? Actions[0] : throw new InvalidOperationException("Empty packet");
+    public static NetPacket FromAction(Action action) => new(action);
 
-    public NetPacket(Action[] actions) => Actions = actions;
-
-    public static NetPacket FromSingleAction(Action action) => new([action]);
+    public NetPacket(Action action) => Action = action;
 }
 
 public sealed class PacketBuffer
