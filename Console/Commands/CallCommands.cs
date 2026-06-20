@@ -114,7 +114,28 @@ public static class CallCommands
             }
         });
         callCmd.AddCommand(sceneMoveCmd);
-        
+
+        // /call try_close_izakaya
+        var tryCloseCmd = new Command("try_close_izakaya", TextId.CallDescTryCloseIzakaya.Get());
+        tryCloseCmd.SetHandler(ctx =>
+        {
+            try
+            {
+                if (!Network.IzakayaCloseAction.TryForceLocalClose())
+                {
+                    ctx.Log(TextId.NotInWorkScene.Get());
+                    return;
+                }
+
+                ctx.Log(TextId.CalledTryCloseIzakaya.Get());
+            }
+            catch (System.Exception e)
+            {
+                ctx.Log(ConsoleFormat.Err(e.Message));
+            }
+        });
+        callCmd.AddCommand(tryCloseCmd);
+
         // Default handler
         callCmd.SetHandler(ctx =>
         {
@@ -122,12 +143,13 @@ public static class CallCommands
             ctx.Log(ConsoleFormat.SubCmd("/call getmapsnpcs", "[mapKey]", TextId.CallDescGetmapsnpcs.Get()));
             ctx.Log(ConsoleFormat.SubCmd("/call movecharacter", "<key> <map> <x> <y> <rot>", TextId.CallDescMovecharacter.Get()));
             ctx.Log(ConsoleFormat.SubCmd("/call scene_move", "<key> <x> <y>", TextId.CallDescSceneMove.Get()));
+            ctx.Log(ConsoleFormat.SubCmd("/call try_close_izakaya", "", TextId.CallDescTryCloseIzakaya.Get()));
             ctx.Log(ConsoleFormat.Line);
         });
 
         root.AddCommand(callCmd);
 
-        CommandRegistry.RegisterCompletions("call", 0, "getmapsnpcs", "movecharacter", "scene_move");
+        CommandRegistry.RegisterCompletions("call", 0, "getmapsnpcs", "movecharacter", "scene_move", "try_close_izakaya");
         CommandRegistry.RegisterHint("call getmapsnpcs", 0, "[mapKey]");
         CommandRegistry.RegisterHint("call movecharacter", 0, "<characterKey>");
         CommandRegistry.RegisterHint("call movecharacter", 1, "<mapKey>");
