@@ -78,6 +78,8 @@ public static partial class MpWire
         _running = true;
         PlayerManager.Local.Id = ConfigManager.GetPlayerId();
         PlayerManager.Local.Uid = MpConstants.HostUid;
+        TimeOffsetMs = 0;          // 主机是时间权威，自身偏移恒为 0
+        LatencyMs = 0;
         Session.EnterDirectHostRoom();
         StartIoThread(() => _tcp.StartHost(port, ConfigManager.EnableIPv6?.Value ?? false));
         Log.LogInfo($"[MpWire] Host on port {port}");
@@ -194,10 +196,23 @@ public static partial class MpWire
             _outbox.Enqueue(new Outbound(framed, null, null, lowPriority));
     }
 
-    public static void UpdateLatency(int id)
+    public static long? UpdateLatency(int id)
     {
-        if (!_pingSent.TryRemove(id, out long t)) return;
-        LatencyMs = (NowMs - t) / 2;
+        if (!_pingSent.TryRemove(id, out long sentMs)) return null;
+        LatencyMs = (NowMs - sentMs) / 2;
+        return sentMs;
+    }
+
+    /// <summary>客机端：基于主机在收到 Ping 那一刻记录的时钟，估算本地与主机的时钟偏移。</summary>
+    /// <param name="hostReceivedMs">主机收到 Ping 时的 NowMs（由 PongAction 携带回客机）。</param>
+    /// <param name="sentMs">客机发出 Ping 时的本地 NowMs（由 UpdateLatency 返回）。</param>
+    public static void UpdateTimeOffset(long hostReceivedMs, long sentMs)
+    {
+        // 主机收到 Ping 那一刻的主机时间 ≈ hostReceivedMs
+        // 对应的客机本地时间 ≈ sentMs + LatencyMs（半个 RTT）
+        // 时钟偏移 = 本地时间 - 主机时间
+        long localEstimateAtHostReceive = sentMs + LatencyMs;
+        TimeOffsetMs = localEstimateAtHostReceive - hostReceivedMs;
     }
 
     // --- session callbacks (from Actions / handshake) ---
@@ -254,7 +269,8 @@ public static partial class MpWire
 
                 _tcp?.Pump();
 
-                if (_running && CanSend)
+                // 仅客机主动 Ping：主机是时间权威，无需估算时钟偏移或延迟。
+                if (_running && CanSend && Session.IsRoomClient)
                 {
                     long now = NowMs;
                     if (now - _lastPingMs >= PingIntervalMs)

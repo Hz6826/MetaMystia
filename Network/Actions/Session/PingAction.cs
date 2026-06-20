@@ -10,8 +10,7 @@ public partial class PingAction : Action
     protected override BepInEx.Logging.LogLevel OnSendLogLevel => BepInEx.Logging.LogLevel.Debug;
     public override void OnReceivedDerived()
     {
-        MpManager.TimeOffset = (MpManager.TimestampNow - TimestampMs) / 2;
-        PongAction.SendPong(Id);
+        PongAction.SendPong(Id, MpWire.NowMs);
     }
 
     /// <summary>

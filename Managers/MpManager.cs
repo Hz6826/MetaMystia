@@ -49,6 +49,8 @@ public static partial class MpManager
 
     public static string PlayerId { get => ConfigManager.GetPlayerId(); set => ConfigManager.SetPlayerId(value); }
     public static long Latency => MpWire.LatencyMs;
+
+    public static string LatencyDisplay => IsRoomHost ? "local" : $"{Latency}ms";
     public static long TimestampNow => MpWire.NowMs;
     public static long TimeOffset { get => MpWire.TimeOffsetMs; set => MpWire.TimeOffsetMs = value; }
     public static long GetSynchronizedTimestampNow => MpWire.SyncedNowMs;
@@ -185,7 +187,7 @@ public static partial class MpManager
         status.AppendLine($"Port: {CurrentPort} | Running: {(IsRunning ? "Yes" : "No")} | Connected: {(IsConnected ? "Yes" : "No")}");
         if (IsConnected)
         {
-            status.AppendLine($"Ping: {Latency} ms | Players: {AllPlayersCount}");
+            status.AppendLine($"Ping: {LatencyDisplay} | Players: {AllPlayersCount}");
             foreach (var kvp in PlayerManager.Peers)
                 status.AppendLine($"  Peer: {(kvp.Key == HOST_UID ? "[S]" : "[C]")} {kvp.Value.Id} (uid={kvp.Key})");
         }
@@ -202,11 +204,11 @@ public static partial class MpManager
             if (IsConnected)
             {
                 if (LiveModeManager.Mode == LiveMode.Partial)
-                    return $"MP: {RoleTag} | {AllPlayersCount}Players | ping {Latency}ms";
+                    return $"MP: {RoleTag} | {AllPlayersCount}Players | ping {LatencyDisplay}";
 
                 var peerNames = string.Join(", ",
                     PlayerManager.Peers.Values.Select(p => LiveModeManager.GetDisplayName(p.Uid)));
-                return $"MP: {RoleTag} uid={PlayerManager.Local.Uid} | {AllPlayersCount}Players | ping {Latency}ms | {peerNames}";
+                return $"MP: {RoleTag} uid={PlayerManager.Local.Uid} | {AllPlayersCount}Players | ping {LatencyDisplay} | {peerNames}";
             }
             return $"MP: {RoleName} (not connected)";
         }
