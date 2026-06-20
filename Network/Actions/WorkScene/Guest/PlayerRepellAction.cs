@@ -21,12 +21,6 @@ public partial class PlayerRepellAction : Action
             () => GuestFSM.DoPlayerRepell(rid));
     }
 
-    public static void Send(int runtimeId)
-    {
-        var action = new PlayerRepellAction()
-        {
-            RuntimeId = runtimeId
-        };
-        action.Enqueue();
-    }
+    public static void Send(int runtimeId) =>
+        new PlayerRepellAction { RuntimeId = runtimeId }.Enqueue();
 }

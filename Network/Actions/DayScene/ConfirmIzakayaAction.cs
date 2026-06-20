@@ -30,11 +30,7 @@ public partial class ConfirmIzakayaAction : Action
     /// </summary>
     public static void Send(MapLabel mapLabel, int mapLevel)
     {
-        var action = new ConfirmIzakayaAction
-        {
-            MapLabel = mapLabel,
-            MapLevel = mapLevel
-        };
-        action.Enqueue();
+        if (!MpManager.IsRoomHost) return;
+        new ConfirmIzakayaAction { MapLabel = mapLabel, MapLevel = mapLevel }.Enqueue();
     }
 }

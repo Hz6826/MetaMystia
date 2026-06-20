@@ -19,13 +19,6 @@ public partial class GuestSpawnAction : Action
         GuestFSM.DoSpawn(RuntimeId, SpawnInfo);
     }
 
-    public static void Send(int runtimeId, GuestSpawnInfo spawnInfo)
-    {
-        var action = new GuestSpawnAction()
-        {
-            RuntimeId = runtimeId,
-            SpawnInfo = spawnInfo,
-        };
-        action.Enqueue();
-    }
+    public static void Send(int runtimeId, GuestSpawnInfo spawnInfo) =>
+        new GuestSpawnAction { RuntimeId = runtimeId, SpawnInfo = spawnInfo }.Enqueue();
 }

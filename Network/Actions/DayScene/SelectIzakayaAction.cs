@@ -34,12 +34,6 @@ public partial class SelectIzakayaAction : Action
         }
     }
 
-    public static void Send(MapLabel mapLabel, int level)
-    {
-        new SelectIzakayaAction
-        {
-            MapLabel = mapLabel,
-            MapLevel = level
-        }.Enqueue();
-    }
+    public static void Send(MapLabel mapLabel, int level) =>
+        new SelectIzakayaAction { MapLabel = mapLabel, MapLevel = level }.Enqueue();
 }

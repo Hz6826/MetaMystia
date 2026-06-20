@@ -116,7 +116,7 @@ public abstract partial class Action
 {
     protected long TimestampMs { get; set; }
     /// <summary>
-    /// 发送者的 UID（主机=0，客机=1,2,3...）
+    /// 发送者的 UID（由主机在转发/入站时写入；HostUid 来自 HelloAck，非固定值）。
     /// </summary>
     public int SenderUid { get; set; }
 
@@ -157,7 +157,31 @@ public abstract partial class Action
             Log.Info($"{MpManager.RoleTag} Discarded (in story): {ActionName}");
             return;
         }
+        if (!PassesReceiveGuards()) return;
         OnReceivedDerived();
+    }
+
+    private bool PassesReceiveGuards()
+    {
+        var method = GetType().GetMethod(nameof(OnReceivedDerived));
+
+        if (method.GetCustomAttribute<RequireHostSenderAttribute>() != null
+            && SenderUid != MpManager.Session.HostUid)
+        {
+            Log.Warning($"{MpManager.RoleTag} {ActionName} from non-host uid={SenderUid}, ignoring", false);
+            return false;
+        }
+
+        if (method.GetCustomAttribute<ClientOnlyReceiveAttribute>() != null && MpManager.IsRoomHost)
+            return false;
+
+        if (method.GetCustomAttribute<HostOnlyReceiveAttribute>() != null && !MpManager.IsRoomHost)
+        {
+            Log.Warning($"{MpManager.RoleTag} {ActionName} received by non-host, ignoring", false);
+            return false;
+        }
+
+        return true;
     }
 
     private Common.UI.Scene? GetReceivedScene()
@@ -272,4 +296,16 @@ public abstract partial class Action
 
     [AttributeUsage(AttributeTargets.Method)]
     protected class DiscardOnStoryAttribute : Attribute { }
+
+    /// <summary>仅当 SenderUid 为 Session.HostUid 时处理（主机权威广播）。</summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    protected class RequireHostSenderAttribute : Attribute { }
+
+    /// <summary>仅客机处理；主机本地已是权威状态，忽略入站包。</summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    protected class ClientOnlyReceiveAttribute : Attribute { }
+
+    /// <summary>仅主机处理（如握手、客机上报）。</summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    protected class HostOnlyReceiveAttribute : Attribute { }
 }

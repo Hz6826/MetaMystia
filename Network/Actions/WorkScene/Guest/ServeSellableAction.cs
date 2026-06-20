@@ -43,9 +43,8 @@ public partial class ServeSellableAction : Action
             () => GuestFSM.DoServe(rid, seq, requested, basedOn, sellableType, senderUid));
     }
 
-    public static void Send(int runtimeId, int orderSeq, Sellable requested, Sellable basedOn, Sellable.SellableType sellableType, int senderUid = -1)
-    {
-        var action = new ServeSellableAction()
+    public static void Send(int runtimeId, int orderSeq, Sellable requested, Sellable basedOn, Sellable.SellableType sellableType, int senderUid = -1) =>
+        new ServeSellableAction
         {
             RuntimeId = runtimeId,
             OrderSeq = orderSeq,
@@ -53,7 +52,5 @@ public partial class ServeSellableAction : Action
             BasedOn = SellableFood.FromSellable(basedOn),
             SellableType = sellableType,
             SenderUid = senderUid == -1 ? PlayerManager.Local.Uid : senderUid
-        };
-        action.Enqueue();
-    }
+        }.Enqueue();
 }

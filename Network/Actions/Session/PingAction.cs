@@ -16,8 +16,6 @@ public partial class PingAction : Action
     /// <summary>
     /// 客机→主机发送 Ping
     /// </summary>
-    public static void Send(int id)
-    {
+    public static void Send(int id) =>
         new PingAction { Id = id }.Enqueue();
-    }
 }

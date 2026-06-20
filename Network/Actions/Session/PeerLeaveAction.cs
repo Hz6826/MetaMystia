@@ -15,10 +15,9 @@ public partial class PeerLeaveAction : Action
 
     protected override BepInEx.Logging.LogLevel OnReceiveLogLevel => BepInEx.Logging.LogLevel.Message;
 
+    [ClientOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         if (PlayerManager.Peers.TryGetValue(PeerUid, out var peer))
         {
             InGameConsole.ShowPassiveFromAnyThread(TextId.PeerLeft.Get(LiveModeManager.GetDisplayName(PeerUid)));
@@ -29,7 +28,6 @@ public partial class PeerLeaveAction : Action
     public static void Send(int leavingUid)
     {
         if (!MpManager.IsRoomHost) return;
-        var action = new PeerLeaveAction { PeerUid = leavingUid };
-        action.Enqueue();
+        new PeerLeaveAction { PeerUid = leavingUid }.Enqueue();
     }
 }

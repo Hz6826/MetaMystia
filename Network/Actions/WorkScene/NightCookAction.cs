@@ -47,14 +47,6 @@ public partial class NightCookAction : Action
         CookControllerPatch.SetCook_ReversePatch(cookerController, food, recipe, false);
     }
 
-    public static void Send(int gridIndex, SellableFood food, int recipeId)
-    {
-        var action = new NightCookAction
-        {
-            GridIndex = gridIndex,
-            RecipeId = recipeId,
-            Food = food
-        };
-        action.Enqueue();
-    }
+    public static void Send(int gridIndex, SellableFood food, int recipeId) =>
+        new NightCookAction { GridIndex = gridIndex, RecipeId = recipeId, Food = food }.Enqueue();
 }

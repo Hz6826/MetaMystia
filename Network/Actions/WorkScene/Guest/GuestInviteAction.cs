@@ -18,10 +18,9 @@ public partial class GuestInviteAction : Action
 
     public List<int> InvitedGuestIds { get; set; } = [];
 
+    [HostOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (!MpManager.IsRoomHost) return;
-
         var invitedGuestIds = InvitedGuestIds ?? [];
         var tracker = StatusTracker.Instance;
         if (tracker == null) return;
@@ -35,10 +34,6 @@ public partial class GuestInviteAction : Action
     public static void Send(List<int> invitedGuestIds)
     {
         if (!MpManager.IsRoomClient) return;
-
-        new GuestInviteAction
-        {
-            InvitedGuestIds = invitedGuestIds ?? []
-        }.Enqueue();
+        new GuestInviteAction { InvitedGuestIds = invitedGuestIds ?? [] }.Enqueue();
     }
 }

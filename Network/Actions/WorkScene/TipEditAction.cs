@@ -21,19 +21,17 @@ public partial class TipEditAction : Action
     public float MoodBuff { get; set; }
     public float ExtraBuff { get; set; }
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var em = EventManager.Instance;
         if (em == null) return;
         NightSceneEventManagerPatch.TipEdit_ReversePatch(em, IntValue, ServeType, ComboBuff, MoodBuff, ExtraBuff);
     }
 
-    public static void Send(int value, EventManager.ServeType serveType, float comboBuff, float moodBuff, float extraBuff)
-    {
+    public static void Send(int value, EventManager.ServeType serveType, float comboBuff, float moodBuff, float extraBuff) =>
         new TipEditAction
         {
             IntValue = value,
@@ -42,5 +40,4 @@ public partial class TipEditAction : Action
             MoodBuff = moodBuff,
             ExtraBuff = extraBuff
         }.Enqueue();
-    }
 }

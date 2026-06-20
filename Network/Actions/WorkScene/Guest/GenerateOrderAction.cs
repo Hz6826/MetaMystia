@@ -55,9 +55,8 @@ public partial class GenerateOrderAction : Action
         });
     }
 
-    public static void Send(int runtimeId, GuestsManager.OrderGenerationResult result, GuestsManager.OrderGenerationResult? overrideResult, GuestsManager.OrderBase orderData)
-    {
-        var action = new GenerateOrderAction()
+    public static void Send(int runtimeId, GuestsManager.OrderGenerationResult result, GuestsManager.OrderGenerationResult? overrideResult, GuestsManager.OrderBase orderData) =>
+        new GenerateOrderAction
         {
             RuntimeId = runtimeId,
             Result = result,
@@ -68,7 +67,5 @@ public partial class GenerateOrderAction : Action
             DeskCode = orderData?.DeskCode ?? -1,
             NotShowInUI = orderData?.NotShowInUI ?? false,
             FreeOrder = orderData?.FreeOrder ?? false
-        };
-        action.Enqueue();
-    }
+        }.Enqueue();
 }

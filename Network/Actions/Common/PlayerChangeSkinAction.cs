@@ -12,7 +12,7 @@ namespace MetaMystia.Network;
 /// </summary>
 [MemoryPackable]
 [AutoLog]
-[Action.PublicRelay]
+[PublicRelay]
 public partial class PlayerChangeSkinAction : Action
 {
     public PlayerSkin Skin { get; set; }
@@ -31,12 +31,6 @@ public partial class PlayerChangeSkinAction : Action
             NetSkinManager.RequestSkin(Skin.NetSkinName);
     }
 
-    public static void Send(PlayerSkin skin)
-    {
-        var action = new PlayerChangeSkinAction
-        {
-            Skin = skin
-        };
-        action.Enqueue();
-    }
+    public static void Send(PlayerSkin skin) =>
+        new PlayerChangeSkinAction { Skin = skin }.Enqueue();
 }

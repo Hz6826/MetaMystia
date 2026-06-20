@@ -10,15 +10,10 @@ namespace MetaMystia.Network;
 [AutoLog]
 public partial class DayAllReadyAction : Action
 {
+    [RequireHostSender]
     [CheckScene(Common.UI.Scene.DayScene)]
     public override void OnReceivedDerived()
     {
-        if (SenderUid != MpManager.Session.HostUid)
-        {
-            Log.LogWarning($"DayAllReady from non-host uid={SenderUid}, ignoring");
-            return;
-        }
-
         InGameConsole.ShowPassive(TextId.AllReadyTransition.Get());
         DaySceneManagerPatch.OnDayOver();
     }

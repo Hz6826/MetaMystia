@@ -27,12 +27,6 @@ public partial class ExtractFoodAction : Action
         WorkSceneStoragePannelPatch.instanceRef?.m_FoodsGroup?.UpdateElements();
     }
 
-    public static void Send(SellableFood food)
-    {
-        var action = new ExtractFoodAction
-        {
-            Food = food
-        };
-        action.Enqueue();
-    }
+    public static void Send(SellableFood food) =>
+        new ExtractFoodAction { Food = food }.Enqueue();
 }

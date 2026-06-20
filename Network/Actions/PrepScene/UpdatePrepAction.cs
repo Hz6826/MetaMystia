@@ -52,12 +52,6 @@ public partial class UpdatePrepAction : Action
         PrepSceneManager.MergeFromPeer(PrepTable);
     }
 
-    public static void Send(Table prepTable)
-    {
-        var action = new UpdatePrepAction
-        {
-            PrepTable = prepTable
-        };
-        action.Enqueue();
-    }
+    public static void Send(Table prepTable) =>
+        new UpdatePrepAction { PrepTable = prepTable }.Enqueue();
 }

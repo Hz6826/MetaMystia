@@ -35,16 +35,13 @@ public partial class ConfirmServeAction : Action
             () => GuestFSM.DoConfirmServe(rid, seq, food, bev, senderUid));
     }
 
-    public static void Send(int runtimeId, int orderSeq, Sellable food, Sellable beverage, int senderUid = -1)
-    {
-        var action = new ConfirmServeAction
+    public static void Send(int runtimeId, int orderSeq, Sellable food, Sellable beverage, int senderUid = -1) =>
+        new ConfirmServeAction
         {
             RuntimeId = runtimeId,
             OrderSeq = orderSeq,
             Food = SellableFood.FromSellable(food),
             Beverage = SellableFood.FromSellable(beverage),
             SenderUid = senderUid == -1 ? PlayerManager.Local.Uid : senderUid
-        };
-        action.Enqueue();
-    }
+        }.Enqueue();
 }

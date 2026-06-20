@@ -27,12 +27,6 @@ public partial class ExtractFromCookerAction : Action
         CookControllerPatch.Extract_ReversePatch(cookerController, null);
     }
 
-    public static void Send(int gridIndex)
-    {
-        var action = new ExtractFromCookerAction
-        {
-            GridIndex = gridIndex
-        };
-        action.Enqueue();
-    }
+    public static void Send(int gridIndex) =>
+        new ExtractFromCookerAction { GridIndex = gridIndex }.Enqueue();
 }

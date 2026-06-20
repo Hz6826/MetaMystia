@@ -23,13 +23,6 @@ public partial class MoveToDeskAction : Action
             () => GuestFSM.DoMoveToDesk(rid, deskCode));
     }
 
-    public static void Send(int runtimeId, int deskCode)
-    {
-        var action = new MoveToDeskAction()
-        {
-            RuntimeId = runtimeId,
-            DeskCode = deskCode
-        };
-        action.Enqueue();
-    }
+    public static void Send(int runtimeId, int deskCode) =>
+        new MoveToDeskAction { RuntimeId = runtimeId, DeskCode = deskCode }.Enqueue();
 }

@@ -16,12 +16,11 @@ public partial class EvaluateOrderAction : Action
     public SellableFood Beverage { get; set; }
     public GuestGroupController.EvaluationResult EvalResult { get; set; }
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var rid = RuntimeId;
         var seq = OrderSeq;
         var food = Food?.ToSellable();
@@ -32,16 +31,13 @@ public partial class EvaluateOrderAction : Action
             () => GuestFSM.DoEvaluateOrder(rid, seq, food, bev, result));
     }
 
-    public static void Send(int runtimeId, int orderSeq, Sellable food, Sellable beverage, GuestGroupController.EvaluationResult result)
-    {
-        var action = new EvaluateOrderAction
+    public static void Send(int runtimeId, int orderSeq, Sellable food, Sellable beverage, GuestGroupController.EvaluationResult result) =>
+        new EvaluateOrderAction
         {
             RuntimeId = runtimeId,
             OrderSeq = orderSeq,
             Food = SellableFood.FromSellable(food),
             Beverage = SellableFood.FromSellable(beverage),
             EvalResult = result
-        };
-        action.Enqueue();
-    }
+        }.Enqueue();
 }

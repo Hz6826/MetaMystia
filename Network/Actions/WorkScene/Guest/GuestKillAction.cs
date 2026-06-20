@@ -19,12 +19,11 @@ public partial class GuestKillAction : Action
     public GuestFSM.State HostStateBeforeKill { get; set; }   // 调试用：观测主客状态分歧
     public int DeskCode { get; set; } = -1;
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var rid = RuntimeId;
         var deskCode = DeskCode;
         var fsm = GuestsMap.GetGuestFsm(rid);
@@ -38,14 +37,11 @@ public partial class GuestKillAction : Action
         fsm.Kill();
     }
 
-    public static void Send(int runtimeId, GuestFSM.State hostStateBeforeKill, int deskCode)
-    {
-        var action = new GuestKillAction
+    public static void Send(int runtimeId, GuestFSM.State hostStateBeforeKill, int deskCode) =>
+        new GuestKillAction
         {
             RuntimeId = runtimeId,
             HostStateBeforeKill = hostStateBeforeKill,
             DeskCode = deskCode
-        };
-        action.Enqueue();
-    }
+        }.Enqueue();
 }

@@ -18,12 +18,11 @@ public partial class PatientDepletedQueueAction : Action
 
     public int RuntimeId { get; set; }
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var rid = RuntimeId;
         var fsm = GuestsMap.GetGuestFsm(rid);
         if (fsm == null) return;
@@ -31,12 +30,6 @@ public partial class PatientDepletedQueueAction : Action
             () => GuestFSM.DoPatientDepletedInQueue(rid));
     }
 
-    public static void Send(int runtimeId)
-    {
-        var action = new PatientDepletedQueueAction
-        {
-            RuntimeId = runtimeId
-        };
-        action.Enqueue();
-    }
+    public static void Send(int runtimeId) =>
+        new PatientDepletedQueueAction { RuntimeId = runtimeId }.Enqueue();
 }

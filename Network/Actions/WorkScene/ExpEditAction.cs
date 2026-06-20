@@ -18,23 +18,16 @@ public partial class ExpEditAction : Action
     public float Value { get; set; }
     public EventManager.MathOperation MathOp { get; set; }
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var em = EventManager.Instance;
         if (em == null) return;
         NightSceneEventManagerPatch.ExpEdit_ReversePatch(em, Value, MathOp);
     }
 
-    public static void Send(float value, EventManager.MathOperation mathOp)
-    {
-        new ExpEditAction
-        {
-            Value = value,
-            MathOp = mathOp
-        }.Enqueue();
-    }
+    public static void Send(float value, EventManager.MathOperation mathOp) =>
+        new ExpEditAction { Value = value, MathOp = mathOp }.Enqueue();
 }

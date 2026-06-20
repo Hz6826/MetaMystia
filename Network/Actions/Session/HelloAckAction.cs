@@ -15,7 +15,7 @@ public partial class HelloAckAction : Action
     public int AssignedUid { get; set; }
 
     /// <summary>
-    /// 主机信息（uid=0）
+    /// 主机信息（Uid = Session.HostUid）
     /// </summary>
     public PlayerInfo HostInfo { get; set; }
 
@@ -42,14 +42,9 @@ public partial class HelloAckAction : Action
     /// <summary>
     /// 客机处理：设置自身 UID，注册主机和已有 peer
     /// </summary>
+    [ClientOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost)
-        {
-            Log.LogWarning("HelloAck received by host, ignoring");
-            return;
-        }
-
         // 设置本地 UID
         PlayerManager.Local.Uid = AssignedUid;
         Log.LogMessage($"Assigned UID: {AssignedUid}");
@@ -81,20 +76,19 @@ public partial class HelloAckAction : Action
     /// </summary>
     public static void Send(int clientUid)
     {
-        // 收集已有 peer（不含新加入者自身）
+        if (!MpManager.IsRoomHost) return;
+
         var existingPeers = new System.Collections.Generic.List<PlayerInfo>();
         foreach (var kvp in PlayerManager.Peers)
         {
-            if (kvp.Key == clientUid) continue; // 不含新加入者自身
+            if (kvp.Key == clientUid) continue;
             existingPeers.Add(PlayerInfo.FromPlayer(kvp.Value));
         }
-
-        var hostInfo = PlayerInfo.FromPlayer(PlayerManager.Local);
 
         new HelloAckAction
         {
             AssignedUid = clientUid,
-            HostInfo = hostInfo,
+            HostInfo = PlayerInfo.FromPlayer(PlayerManager.Local),
             ExistingPeers = existingPeers.ToArray(),
             WireTargetUid = clientUid,
         }.Enqueue();

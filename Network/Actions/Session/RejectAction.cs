@@ -16,10 +16,9 @@ public partial class RejectAction : Action
 
     protected override BepInEx.Logging.LogLevel OnReceiveLogLevel => BepInEx.Logging.LogLevel.Warning;
 
+    [ClientOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var reason = ReasonId.Get(ReasonArgs);
         Log.LogWarning($"Connection rejected: {reason}");
         InGameConsole.ShowPassiveFromAnyThread(reason);

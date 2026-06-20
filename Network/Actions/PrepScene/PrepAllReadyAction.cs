@@ -11,15 +11,10 @@ public partial class PrepAllReadyAction : Action
 {
     public UpdatePrepAction.Table PrepTable { get; set; } = new();
 
+    [RequireHostSender]
     [CheckScene(Common.UI.Scene.IzakayaPrepScene)]
     public override void OnReceivedDerived()
     {
-        if (SenderUid != MpManager.Session.HostUid)
-        {
-            Log.LogWarning($"PrepAllReady from non-host uid={SenderUid}, ignoring");
-            return;
-        }
-
         PrepSceneManager.ApplyHostTable(PrepTable);
         IzakayaConfigPannelPatch.PrepOver();
     }

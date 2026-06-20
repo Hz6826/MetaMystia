@@ -16,10 +16,9 @@ public partial class PeerJoinAction : Action
 
     protected override BepInEx.Logging.LogLevel OnReceiveLogLevel => BepInEx.Logging.LogLevel.Message;
 
+    [ClientOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         if (PeerInfo.Uid == PlayerManager.Local.Uid) return;
 
         if (!PlayerManager.Peers.TryGetValue(PeerInfo.Uid, out var peer))
@@ -48,7 +47,6 @@ public partial class PeerJoinAction : Action
     {
         if (!MpManager.IsRoomHost) return;
         if (PlayerManager.Peers.Count <= 1) return;
-
         new PeerJoinAction { PeerInfo = peerInfo, WireExceptUid = exceptUid }.Enqueue();
     }
 }

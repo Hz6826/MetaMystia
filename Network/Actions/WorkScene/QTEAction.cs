@@ -29,13 +29,6 @@ public partial class QTEAction : Action
         CookControllerPatch.StartCookCountDown_ReversePatch(cookerController, QTEScore, false);
     }
 
-    public static void Send(int gridIndex, float qteScore)
-    {
-        var action = new QTEAction
-        {
-            GridIndex = gridIndex,
-            QTEScore = qteScore
-        };
-        action.Enqueue();
-    }
+    public static void Send(int gridIndex, float qteScore) =>
+        new QTEAction { GridIndex = gridIndex, QTEScore = qteScore }.Enqueue();
 }

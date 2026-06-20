@@ -25,14 +25,9 @@ public partial class HelloAction : Action
     /// <summary>
     /// 仅主机处理：验证客机，分配 UID，回复 HelloAck，通告已有客机
     /// </summary>
+    [HostOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (!MpManager.IsRoomHost)
-        {
-            Log.LogWarning("Hello received by non-host, ignoring");
-            return;
-        }
-
         // --- 版本校验 ---
         if (Version != Plugin.ModVersion)
         {

@@ -20,12 +20,6 @@ public partial class MoveToQueueAction : Action
             () => GuestFSM.DoMoveToQueue(rid));
     }
 
-    public static void Send(int runtimeId)
-    {
-        var action = new MoveToQueueAction()
-        {
-            RuntimeId = runtimeId
-        };
-        action.Enqueue();
-    }
+    public static void Send(int runtimeId) =>
+        new MoveToQueueAction { RuntimeId = runtimeId }.Enqueue();
 }

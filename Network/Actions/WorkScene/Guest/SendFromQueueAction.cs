@@ -8,12 +8,11 @@ public partial class SendFromQueueAction : Action
 {
     public int RuntimeId { get; set; }
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var rid = RuntimeId;
         var fsm = GuestsMap.GetGuestFsm(rid);
         if (fsm == null) return;
@@ -21,12 +20,6 @@ public partial class SendFromQueueAction : Action
             () => GuestFSM.DoSendFromQueue(rid));
     }
 
-    public static void Send(int runtimeId)
-    {
-        var action = new SendFromQueueAction
-        {
-            RuntimeId = runtimeId,
-        };
-        action.Enqueue();
-    }
+    public static void Send(int runtimeId) =>
+        new SendFromQueueAction { RuntimeId = runtimeId }.Enqueue();
 }

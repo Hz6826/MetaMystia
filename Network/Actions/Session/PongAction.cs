@@ -15,10 +15,9 @@ public partial class PongAction : Action
     protected override BepInEx.Logging.LogLevel OnReceiveLogLevel => BepInEx.Logging.LogLevel.Debug;
     protected override BepInEx.Logging.LogLevel OnSendLogLevel => BepInEx.Logging.LogLevel.Debug;
 
+    [ClientOnlyReceive]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var sentMs = MpWire.UpdateLatency(Id);
         if (sentMs is long t && HostReceivedMs > 0)
             MpWire.UpdateTimeOffset(HostReceivedMs, t);
@@ -27,8 +26,6 @@ public partial class PongAction : Action
     /// <summary>
     /// 主机收到 Ping 后回复 Pong，携带主机收到 Ping 那一刻的时间戳。
     /// </summary>
-    public static void Send(int id, long hostReceivedMs)
-    {
+    public static void Send(int id, long hostReceivedMs) =>
         new PongAction { Id = id, HostReceivedMs = hostReceivedMs }.Enqueue();
-    }
 }

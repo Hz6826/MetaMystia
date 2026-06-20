@@ -31,12 +31,6 @@ public partial class SceneTransitAction : Action
         return;
     }
 
-    public static void Send(Common.UI.Scene scene)
-    {
-        var action = new SceneTransitAction
-        {
-            Scene = scene,
-        };
-        action.Enqueue();
-    }
+    public static void Send(Common.UI.Scene scene) =>
+        new SceneTransitAction { Scene = scene }.Enqueue();
 }

@@ -39,6 +39,7 @@ public partial class IzakayaCloseAction : Action
     /// </summary>
     public static void Send()
     {
+        if (!MpManager.IsRoomHost) return;
         new IzakayaCloseAction().Enqueue();
     }
 }

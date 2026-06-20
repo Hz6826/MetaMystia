@@ -22,12 +22,11 @@ public partial class GuestLeaveAction : Action
     public byte LeaveType { get; set; }
     public bool TriggerLeaveBuff { get; set; }
 
+    [ClientOnlyReceive]
     [DiscardOnStory]
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        if (MpManager.IsRoomHost) return;
-
         var rid = RuntimeId;
         var leaveType = (GuestGroupController.LeaveType)LeaveType;
         var triggerLeaveBuff = TriggerLeaveBuff;
@@ -37,14 +36,11 @@ public partial class GuestLeaveAction : Action
             () => GuestFSM.DoLeaveFromDesk(rid, leaveType, triggerLeaveBuff));
     }
 
-    public static void Send(int runtimeId, GuestGroupController.LeaveType leaveType, bool triggerLeaveBuff)
-    {
-        var action = new GuestLeaveAction
+    public static void Send(int runtimeId, GuestGroupController.LeaveType leaveType, bool triggerLeaveBuff) =>
+        new GuestLeaveAction
         {
             RuntimeId = runtimeId,
             LeaveType = (byte)leaveType,
             TriggerLeaveBuff = triggerLeaveBuff
-        };
-        action.Enqueue();
-    }
+        }.Enqueue();
 }
