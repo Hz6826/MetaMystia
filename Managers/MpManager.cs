@@ -67,7 +67,11 @@ public static partial class MpManager
     /// <summary>至少进入过一次主界面后，才允许开服或连接主机。</summary>
     public static bool IsMultiplayerAvailable { get; private set; }
 
+#if DEBUG
+    public static int WorkTimeSecondOverride = 30;
+#else
     public static int WorkTimeSecondOverride = 9 * 60;
+#endif
 
     private static bool _inStory;
     public static bool InStory => _inStory;
