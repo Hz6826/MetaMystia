@@ -31,13 +31,10 @@ public partial class GuestLeaveAction : Action
         var rid = RuntimeId;
         var leaveType = (GuestGroupController.LeaveType)LeaveType;
         var triggerLeaveBuff = TriggerLeaveBuff;
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var fsm = GuestsMap.GetGuestFsm(rid);
-            if (fsm == null) return;
-            fsm.Enqueue(nameof(GuestFSM.DoLeaveFromDesk),
-                () => GuestFSM.DoLeaveFromDesk(rid, leaveType, triggerLeaveBuff));
-        });
+        var fsm = GuestsMap.GetGuestFsm(rid);
+        if (fsm == null) return;
+        fsm.Enqueue(nameof(GuestFSM.DoLeaveFromDesk),
+            () => GuestFSM.DoLeaveFromDesk(rid, leaveType, triggerLeaveBuff));
     }
 
     public static void Send(int runtimeId, GuestGroupController.LeaveType leaveType, bool triggerLeaveBuff)

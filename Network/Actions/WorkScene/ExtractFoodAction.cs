@@ -22,12 +22,9 @@ public partial class ExtractFoodAction : Action
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            IzakayaConfigure.Instance?.RemoveStoredFood(Food.GetFromLocal());
-            WorkSceneStoragePannelPatch.instanceRef?.UpdateFoodField();
-            WorkSceneStoragePannelPatch.instanceRef?.m_FoodsGroup?.UpdateElements();
-        });
+        IzakayaConfigure.Instance?.RemoveStoredFood(Food.GetFromLocal());
+        WorkSceneStoragePannelPatch.instanceRef?.UpdateFoodField();
+        WorkSceneStoragePannelPatch.instanceRef?.m_FoodsGroup?.UpdateElements();
     }
 
     public static void Send(SellableFood food)

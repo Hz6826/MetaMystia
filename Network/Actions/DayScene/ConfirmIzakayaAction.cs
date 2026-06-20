@@ -19,13 +19,10 @@ public partial class ConfirmIzakayaAction : Action
 
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var display = MapLabel.FormatIzakayaSelection(MapLevel);
-            InGameConsole.ShowPassive(TextId.SelectedIzakaya.Get(display));
+        var display = MapLabel.FormatIzakayaSelection(MapLevel);
+        InGameConsole.ShowPassive(TextId.SelectedIzakaya.Get(display));
 
-            IzakayaSelectorPanelPatch.TryProceedWithConfirmedSelection(MapLabel, (IzakayaLevel)MapLevel);
-        });
+        IzakayaSelectorPanelPatch.TryProceedWithConfirmedSelection(MapLabel, (IzakayaLevel)MapLevel);
     }
 
     /// <summary>

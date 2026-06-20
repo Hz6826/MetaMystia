@@ -22,11 +22,8 @@ public partial class NightMoveSyncAction : Action
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            if (PlayerManager.TryGetVisiblePeer(SenderUid, out var peer))
-                peer.NightSyncFromPeer(Speed, new UnityEngine.Vector2(Vx, Vy), new UnityEngine.Vector2(Px, Py));
-        });
+        if (PlayerManager.TryGetVisiblePeer(SenderUid, out var peer))
+            peer.NightSyncFromPeer(Speed, new UnityEngine.Vector2(Vx, Vy), new UnityEngine.Vector2(Px, Py));
     }
 
     public static void SendSync()

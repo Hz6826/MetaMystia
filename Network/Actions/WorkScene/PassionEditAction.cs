@@ -24,12 +24,9 @@ public partial class PassionEditAction : Action
     {
         if (MpManager.IsRoomHost) return;
 
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var em = EventManager.Instance;
-            if (em == null) return;
-            NightSceneEventManagerPatch.PassionEdit_ReversePatch(em, Value, MathOp);
-        });
+        var em = EventManager.Instance;
+        if (em == null) return;
+        NightSceneEventManagerPatch.PassionEdit_ReversePatch(em, Value, MathOp);
     }
 
     public static void Send(float value, EventManager.MathOperation mathOp)

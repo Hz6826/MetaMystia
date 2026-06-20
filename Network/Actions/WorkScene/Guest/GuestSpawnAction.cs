@@ -16,7 +16,7 @@ public partial class GuestSpawnAction : Action
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() => GuestFSM.DoSpawn(RuntimeId, SpawnInfo));
+        GuestFSM.DoSpawn(RuntimeId, SpawnInfo);
     }
 
     public static void Send(int runtimeId, GuestSpawnInfo spawnInfo)

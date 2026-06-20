@@ -16,25 +16,22 @@ public partial class SelectIzakayaAction : Action
     public int MapLevel { get; set; } = 0;
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
+        PlayerManager.SetPeerIzakayaSelection(SenderUid, MapLabel, MapLevel);
+
+        var peerName = LiveModeManager.GetDisplayName(SenderUid);
+        InGameConsole.ShowPassive(TextId.PeerSelectedIzakaya.Get(
+            $"{peerName}", MapLabel.FormatIzakayaSelection(MapLevel)));
+
+        if (MpManager.IsServer)
         {
-            PlayerManager.SetPeerIzakayaSelection(SenderUid, MapLabel, MapLevel);
-
-            var peerName = LiveModeManager.GetDisplayName(SenderUid);
-            InGameConsole.ShowPassive(TextId.PeerSelectedIzakaya.Get(
-                $"{peerName}", MapLabel.FormatIzakayaSelection(MapLevel)));
-
-            if (MpManager.IsServer)
-            {
-                // 主机收到 SELECT 后自动检查全员是否一致
-                IzakayaSelectorPanelPatch.TryConfirmSelection();
-            }
-            else
-            {
-                // 客机也显示当前选店状态摘要
-                IzakayaSelectorPanelPatch.ShowSelectionStatus();
-            }
-        });
+            // 主机收到 SELECT 后自动检查全员是否一致
+            IzakayaSelectorPanelPatch.TryConfirmSelection();
+        }
+        else
+        {
+            // 客机也显示当前选店状态摘要
+            IzakayaSelectorPanelPatch.ShowSelectionStatus();
+        }
     }
 
     public static void Send(MapLabel mapLabel, int level)

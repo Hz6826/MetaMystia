@@ -23,31 +23,28 @@ public partial class NightCookAction : Action
     public override void OnReceivedDerived()
     {
         Log.LogInfo($"Received COOK: CookerIndex={GridIndex}, FoodId={Food.Id}, Modifiers=[{string.Join(",", Food.ModifierIds)}]");
-        PluginManager.Instance.RunOnMainThread(() =>
+        if (!PlayerManager.RecipeAvailable(RecipeId))
         {
-            if (!PlayerManager.RecipeAvailable(RecipeId))
-            {
-                Log.Error($"RecipeId {RecipeId} not available!");
-                return;
-            }
-            var recipe = RecipeId.RefRecipe();
-            if (recipe == null)
-            {
-                Log.LogWarning($"Failed to create recipe");
-                return;
-            }
+            Log.Error($"RecipeId {RecipeId} not available!");
+            return;
+        }
+        var recipe = RecipeId.RefRecipe();
+        if (recipe == null)
+        {
+            Log.LogWarning($"Failed to create recipe");
+            return;
+        }
 
-            var food = Food.ToSellable();
+        var food = Food.ToSellable();
 
-            var cookerController = CookManager.GetCookerControllerByIndex(GridIndex);
-            if (cookerController == null)
-            {
-                Log.LogWarning($"Failed to find CookerController with GridIndex={GridIndex}");
-                return;
-            }
+        var cookerController = CookManager.GetCookerControllerByIndex(GridIndex);
+        if (cookerController == null)
+        {
+            Log.LogWarning($"Failed to find CookerController with GridIndex={GridIndex}");
+            return;
+        }
 
-            CookControllerPatch.SetCook_ReversePatch(cookerController, food, recipe, false);
-        });
+        CookControllerPatch.SetCook_ReversePatch(cookerController, food, recipe, false);
     }
 
     public static void Send(int gridIndex, SellableFood food, int recipeId)

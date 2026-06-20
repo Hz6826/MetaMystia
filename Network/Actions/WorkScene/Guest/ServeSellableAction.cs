@@ -37,13 +37,10 @@ public partial class ServeSellableAction : Action
         var requested = Requested?.ToSellable();
         var basedOn = BasedOn?.ToSellable();
         var senderUid = SenderUid;
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var fsm = GuestsMap.GetGuestFsm(rid);
-            if (fsm == null) return;
-            fsm.Enqueue(nameof(GuestFSM.DoServe),
-                () => GuestFSM.DoServe(rid, seq, requested, basedOn, sellableType, senderUid));
-        });
+        var fsm = GuestsMap.GetGuestFsm(rid);
+        if (fsm == null) return;
+        fsm.Enqueue(nameof(GuestFSM.DoServe),
+            () => GuestFSM.DoServe(rid, seq, requested, basedOn, sellableType, senderUid));
     }
 
     public static void Send(int runtimeId, int orderSeq, Sellable requested, Sellable basedOn, Sellable.SellableType sellableType, int senderUid = -1)

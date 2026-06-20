@@ -27,12 +27,9 @@ public partial class EvaluateOrderAction : Action
         var food = Food?.ToSellable();
         var bev = Beverage?.ToSellable();
         var result = EvalResult;
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var fsm = GuestsMap.GetGuestFsm(rid);
-            fsm?.Enqueue(nameof(GuestFSM.DoEvaluateOrder),
-                () => GuestFSM.DoEvaluateOrder(rid, seq, food, bev, result));
-        });
+        var fsm = GuestsMap.GetGuestFsm(rid);
+        fsm?.Enqueue(nameof(GuestFSM.DoEvaluateOrder),
+            () => GuestFSM.DoEvaluateOrder(rid, seq, food, bev, result));
     }
 
     public static void Send(int runtimeId, int orderSeq, Sellable food, Sellable beverage, GuestGroupController.EvaluationResult result)

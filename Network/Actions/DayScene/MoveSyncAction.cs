@@ -26,12 +26,9 @@ public partial class MoveSyncAction : Action
     [CheckScene(Common.UI.Scene.DayScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            if (PlayerManager.TryGetVisiblePeer(SenderUid, out var peer))
-                peer.SyncFromPeer(MapLabel, IsSprinting, Speed,
-                    new UnityEngine.Vector2(Vx, Vy), new UnityEngine.Vector2(Px, Py));
-        });
+        if (PlayerManager.TryGetVisiblePeer(SenderUid, out var peer))
+            peer.SyncFromPeer(MapLabel, IsSprinting, Speed,
+                new UnityEngine.Vector2(Vx, Vy), new UnityEngine.Vector2(Px, Py));
     }
 
     // Also send nightsync

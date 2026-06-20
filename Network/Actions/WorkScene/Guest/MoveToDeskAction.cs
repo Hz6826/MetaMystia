@@ -17,13 +17,10 @@ public partial class MoveToDeskAction : Action
     {
         var rid = RuntimeId;
         var deskCode = DeskCode;
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var fsm = GuestsMap.GetGuestFsm(rid);
-            if (fsm == null) return;
-            fsm.Enqueue(nameof(GuestFSM.DoMoveToDesk),
-                () => GuestFSM.DoMoveToDesk(rid, deskCode));
-        });
+        var fsm = GuestsMap.GetGuestFsm(rid);
+        if (fsm == null) return;
+        fsm.Enqueue(nameof(GuestFSM.DoMoveToDesk),
+            () => GuestFSM.DoMoveToDesk(rid, deskCode));
     }
 
     public static void Send(int runtimeId, int deskCode)

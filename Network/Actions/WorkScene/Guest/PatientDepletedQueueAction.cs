@@ -25,13 +25,10 @@ public partial class PatientDepletedQueueAction : Action
         if (MpManager.IsRoomHost) return;
 
         var rid = RuntimeId;
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var fsm = GuestsMap.GetGuestFsm(rid);
-            if (fsm == null) return;
-            fsm.Enqueue(nameof(GuestFSM.DoPatientDepletedInQueue),
-                () => GuestFSM.DoPatientDepletedInQueue(rid));
-        });
+        var fsm = GuestsMap.GetGuestFsm(rid);
+        if (fsm == null) return;
+        fsm.Enqueue(nameof(GuestFSM.DoPatientDepletedInQueue),
+            () => GuestFSM.DoPatientDepletedInQueue(rid));
     }
 
     public static void Send(int runtimeId)

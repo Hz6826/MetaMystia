@@ -19,19 +19,16 @@ public partial class PlayerChangeSkinAction : Action
 
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
+        if (!PlayerManager.TryGetVisiblePeer(SenderUid, out var peer))
         {
-            if (!PlayerManager.TryGetVisiblePeer(SenderUid, out var peer))
-            {
-                return;
-            }
+            return;
+        }
 
-            peer.Skin = Skin;
-            peer.UpdateCharacterSprite();
-            // 如果对端使用了网络皮肤，本地也应该从服务器拉取（完成后会自动刷新）
-            if (!string.IsNullOrEmpty(Skin?.NetSkinName))
-                NetSkinManager.RequestSkin(Skin.NetSkinName);
-        });
+        peer.Skin = Skin;
+        peer.UpdateCharacterSprite();
+        // 如果对端使用了网络皮肤，本地也应该从服务器拉取（完成后会自动刷新）
+        if (!string.IsNullOrEmpty(Skin?.NetSkinName))
+            NetSkinManager.RequestSkin(Skin.NetSkinName);
     }
 
     public static void Send(PlayerSkin skin)

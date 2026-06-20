@@ -20,21 +20,18 @@ public partial class IzakayaCloseAction : Action
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
+        Log.Message($"Received close command from host");
+        InGameConsole.ShowPassive(TextId.PeerClosedIzakaya.Get(PlayerManager.GetPeerName(SenderUid)));
+        var eventManager = EventManager.Instance;
+        if (eventManager == null)
         {
-            Log.Message($"Received close command from host");
-            InGameConsole.ShowPassive(TextId.PeerClosedIzakaya.Get(PlayerManager.GetPeerName(SenderUid)));
-            var eventManager = EventManager.Instance;
-            if (eventManager == null)
-            {
-                Log.Warning("EventManager is null when replaying host close.");
-                return;
-            }
+            Log.Warning("EventManager is null when replaying host close.");
+            return;
+        }
 
-            NightSceneEventManagerPatch.HostCloseReplay.Grant();
-            NightSceneEventManagerPatch.StopInstantiationLoopAndCloseIzakaya_ReversePatch(eventManager);
-            NightSceneEventManagerPatch.HostCloseReplay.Reset();
-        });
+        NightSceneEventManagerPatch.HostCloseReplay.Grant();
+        NightSceneEventManagerPatch.StopInstantiationLoopAndCloseIzakaya_ReversePatch(eventManager);
+        NightSceneEventManagerPatch.HostCloseReplay.Reset();
     }
 
     /// <summary>

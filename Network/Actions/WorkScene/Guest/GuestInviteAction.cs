@@ -23,16 +23,13 @@ public partial class GuestInviteAction : Action
         if (!MpManager.IsRoomHost) return;
 
         var invitedGuestIds = InvitedGuestIds ?? [];
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var tracker = StatusTracker.Instance;
-            if (tracker == null) return;
+        var tracker = StatusTracker.Instance;
+        if (tracker == null) return;
 
-            foreach (var guestId in invitedGuestIds.Distinct().Where(PlayerManager.SpecialGuestAvailable))
-            {
-                StatusTrackerPatch.RecordInvitedGuest_ReversePatch(tracker, guestId);
-            }
-        });
+        foreach (var guestId in invitedGuestIds.Distinct().Where(PlayerManager.SpecialGuestAvailable))
+        {
+            StatusTrackerPatch.RecordInvitedGuest_ReversePatch(tracker, guestId);
+        }
     }
 
     public static void Send(List<int> invitedGuestIds)

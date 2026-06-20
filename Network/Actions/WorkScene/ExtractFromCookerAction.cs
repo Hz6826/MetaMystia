@@ -18,16 +18,13 @@ public partial class ExtractFromCookerAction : Action
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
+        var cookerController = CookManager.GetCookerControllerByIndex(GridIndex);
+        if (cookerController == null)
         {
-            var cookerController = CookManager.GetCookerControllerByIndex(GridIndex);
-            if (cookerController == null)
-            {
-                Log.LogWarning($"Failed to find CookerController with GridIndex={GridIndex}");
-                return;
-            }
-            CookControllerPatch.Extract_ReversePatch(cookerController, null);
-        });
+            Log.LogWarning($"Failed to find CookerController with GridIndex={GridIndex}");
+            return;
+        }
+        CookControllerPatch.Extract_ReversePatch(cookerController, null);
     }
 
     public static void Send(int gridIndex)

@@ -27,12 +27,9 @@ public partial class TipEditAction : Action
     {
         if (MpManager.IsRoomHost) return;
 
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var em = EventManager.Instance;
-            if (em == null) return;
-            NightSceneEventManagerPatch.TipEdit_ReversePatch(em, IntValue, ServeType, ComboBuff, MoodBuff, ExtraBuff);
-        });
+        var em = EventManager.Instance;
+        if (em == null) return;
+        NightSceneEventManagerPatch.TipEdit_ReversePatch(em, IntValue, ServeType, ComboBuff, MoodBuff, ExtraBuff);
     }
 
     public static void Send(int value, EventManager.ServeType serveType, float comboBuff, float moodBuff, float extraBuff)

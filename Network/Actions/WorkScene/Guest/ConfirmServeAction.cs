@@ -29,13 +29,10 @@ public partial class ConfirmServeAction : Action
         var food = Food?.ToSellable();
         var bev = Beverage?.ToSellable();
         var senderUid = SenderUid;
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            var fsm = GuestsMap.GetGuestFsm(rid);
-            if (fsm == null) return;
-            fsm.Enqueue(nameof(GuestFSM.DoConfirmServe),
-                () => GuestFSM.DoConfirmServe(rid, seq, food, bev, senderUid));
-        });
+        var fsm = GuestsMap.GetGuestFsm(rid);
+        if (fsm == null) return;
+        fsm.Enqueue(nameof(GuestFSM.DoConfirmServe),
+            () => GuestFSM.DoConfirmServe(rid, seq, food, bev, senderUid));
     }
 
     public static void Send(int runtimeId, int orderSeq, Sellable food, Sellable beverage, int senderUid = -1)

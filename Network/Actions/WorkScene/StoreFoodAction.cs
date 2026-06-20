@@ -20,12 +20,9 @@ public partial class StoreFoodAction : Action
     [CheckScene(Common.UI.Scene.WorkScene)]
     public override void OnReceivedDerived()
     {
-        PluginManager.Instance.RunOnMainThread(() =>
-        {
-            IzakayaConfigurePatch.StoreFood_Original(Food.ToSellable());
-            WorkSceneStoragePannelPatch.instanceRef?.UpdateFoodField();
-            WorkSceneStoragePannelPatch.instanceRef?.m_FoodsGroup?.UpdateElements();
-        });
+        IzakayaConfigurePatch.StoreFood_Original(Food.ToSellable());
+        WorkSceneStoragePannelPatch.instanceRef?.UpdateFoodField();
+        WorkSceneStoragePannelPatch.instanceRef?.m_FoodsGroup?.UpdateElements();
     }
 
     public static void Send(SellableFood food)

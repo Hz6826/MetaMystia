@@ -44,16 +44,13 @@ public partial class StoreSellableAction : Action
                 Log.LogError($"StoreSellableAction.OnReceived called with unsupported FoodType: {FoodType}");
                 return;
         }
-        PluginManager.Instance.RunOnMainThread(() =>
+        var cookerController = CookManager.GetCookerControllerByIndex(GridIndex);
+        if (cookerController == null)
         {
-            var cookerController = CookManager.GetCookerControllerByIndex(GridIndex);
-            if (cookerController == null)
-            {
-                Log.LogWarning($"Failed to find CookerController with GridIndex={GridIndex}");
-                return;
-            }
-            CookControllerPatch.Store_ReversePatch(cookerController, sellable);
-        });
+            Log.LogWarning($"Failed to find CookerController with GridIndex={GridIndex}");
+            return;
+        }
+        CookControllerPatch.Store_ReversePatch(cookerController, sellable);
     }
 
     public static void Send(int gridIndex, Sellable sellable)
