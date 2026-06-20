@@ -123,6 +123,13 @@ public abstract partial class Action
     [MemoryPackIgnore] public int? WireTargetUid { get; set; }
     [MemoryPackIgnore] public int? WireExceptUid { get; set; }
 
+    /// <summary>
+    /// 构造时填充 SenderUid 的来源。默认读取本地玩家 UID（依赖 Unity/il2cpp 运行时）。
+    /// 无运行时环境（如独立服务端）可替换为常量提供器，避免触发 PlayerManager 静态初始化。
+    /// </summary>
+    [MemoryPackIgnore]
+    public static Func<int> LocalUidProvider { get; set; } = static () => PlayerManager.Local.Uid;
+
     [MemoryPackIgnore]
     protected virtual LogLevel OnReceiveLogLevel { get; } = LogLevel.Info;
 
@@ -138,7 +145,7 @@ public abstract partial class Action
     protected Action()
     {
         TimestampMs = MpWire.NowMs;
-        SenderUid = PlayerManager.Local.Uid;
+        SenderUid = LocalUidProvider();
     }
 
 
