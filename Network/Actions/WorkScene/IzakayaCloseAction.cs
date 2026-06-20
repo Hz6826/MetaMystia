@@ -1,8 +1,10 @@
 using MemoryPack;
+using System.Linq;
 
 using MetaMystia.Patch;
 using MetaMystia.UI;
 using NightScene.EventUtility;
+using NightScene.GuestManagementUtility;
 
 namespace MetaMystia.Network;
 
@@ -31,7 +33,36 @@ public partial class IzakayaCloseAction : Action
 
         NightSceneEventManagerPatch.HostCloseReplay.Grant();
         NightSceneEventManagerPatch.StopInstantiationLoopAndCloseIzakaya_ReversePatch(eventManager);
+        UnblockClientCloseWait(eventManager);
         NightSceneEventManagerPatch.HostCloseReplay.Reset();
+    }
+
+    /// <summary>
+    /// 客机 <see cref="GuestsManager.OnWaitForAllGuestToLeave"/> 依赖 occupiedDesks 清空且 CanCloseIzakaya 为真。
+    /// 联机下 occupiedDesks 由 ReplayTrySendToSeat 写入，但 LeaveFromDesk 平时被 Prefix 跳过，desync 后会残留幽灵占桌。
+    /// </summary>
+    private static void UnblockClientCloseWait(EventManager eventManager)
+    {
+        if (!MpManager.IsRoomClient) return;
+
+        eventManager.RegisteredDoNotCloseIzakayaStatus = 0;
+
+        var guestsManager = GuestsManager.Instance;
+        if (guestsManager == null) return;
+
+        guestsManager.TryRepellAllQueuedGuestControllers();
+
+        var occupiedDesks = guestsManager.occupiedDesks;
+        if (occupiedDesks == null) return;
+
+        foreach (var deskCode in occupiedDesks.ToArray())
+        {
+            var guest = guestsManager.GetInDeskGuest(deskCode);
+            if (guest == null || !guest.HaveNotLeft())
+            {
+                occupiedDesks.Remove(deskCode);
+            }
+        }
     }
 
     /// <summary>

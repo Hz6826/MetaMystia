@@ -337,7 +337,10 @@ public partial class GuestFSM
     public static void OnPlayerRepell(int deskCode)
     {
         var controller = GuestsManager.Instance.GetInDeskGuest(deskCode);
+        if (controller == null) return;
+
         var fsm = GuestsMap.GetGuestFsm(controller);
+        if (fsm == null) return;
 
         PlayerRepellAction.Send(fsm.RuntimeId);
         fsm.To(State.Left);
