@@ -27,8 +27,8 @@ public partial class PongAction : Action
     /// <summary>
     /// 主机收到 Ping 后回复 Pong，携带主机收到 Ping 那一刻的时间戳。
     /// </summary>
-    public static void SendPong(int id, long hostReceivedMs)
+    public static void Send(int id, long hostReceivedMs)
     {
-        new PongAction { Id = id, HostReceivedMs = hostReceivedMs }.Send();
+        new PongAction { Id = id, HostReceivedMs = hostReceivedMs }.Enqueue();
     }
 }

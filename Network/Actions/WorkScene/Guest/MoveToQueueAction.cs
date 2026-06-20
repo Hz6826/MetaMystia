@@ -26,6 +26,6 @@ public partial class MoveToQueueAction : Action
         {
             RuntimeId = runtimeId
         };
-        action.Send();
+        action.Enqueue();
     }
 }

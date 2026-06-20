@@ -40,6 +40,6 @@ public partial class SelectIzakayaAction : Action
         {
             MapLabel = mapLabel,
             MapLevel = level
-        }.Send();
+        }.Enqueue();
     }
 }

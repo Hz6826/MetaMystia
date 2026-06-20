@@ -34,6 +34,6 @@ public partial class PlayerChangeIdAction : Action
         // 更新本地玩家自己的头顶标签
         PlayerManager.Local.Id = newId;
         FloatingTextHelper.UpdatePlayerLabel(PlayerManager.Local.Uid, LiveModeManager.GetDisplayName(PlayerManager.Local.Uid));
-        new PlayerChangeIdAction { NewPlayerId = newId }.Send();
+        new PlayerChangeIdAction { NewPlayerId = newId }.Enqueue();
     }
 }

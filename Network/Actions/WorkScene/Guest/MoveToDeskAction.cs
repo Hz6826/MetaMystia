@@ -30,6 +30,6 @@ public partial class MoveToDeskAction : Action
             RuntimeId = runtimeId,
             DeskCode = deskCode
         };
-        action.Send();
+        action.Enqueue();
     }
 }

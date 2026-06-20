@@ -108,10 +108,10 @@ public partial class HelloAction : Action
         }
 
         // 向新客机发送 HelloAck（携带分配的 UID + 所有已有 peer 信息）
-        HelloAckAction.SendTo(PeerInfo.Uid);
+        HelloAckAction.Send(PeerInfo.Uid);
 
         // 向所有已有客机通告新玩家加入
-        PeerJoinAction.BroadcastExcept(PeerInfo.Uid, PeerInfo);
+        PeerJoinAction.Send(PeerInfo.Uid, PeerInfo);
 
         // 启动同步
         MpWire.OnPeerHandshakeComplete(PeerInfo.Uid);
@@ -122,7 +122,7 @@ public partial class HelloAction : Action
     /// <summary>
     /// 客机发送 Hello 给主机请求连接
     /// </summary>
-    public static void SendHello()
+    public static void Send()
     {
         PlayerInfo peerInfo = new PlayerInfo()
         {
@@ -139,6 +139,6 @@ public partial class HelloAction : Action
             Version = Plugin.ModVersion,
             CurrentGameScene = MpManager.LocalScene,
             GameVersion = Plugin.GameVersion,
-        }.Send();
+        }.Enqueue();
     }
 }

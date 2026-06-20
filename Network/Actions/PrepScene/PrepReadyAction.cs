@@ -18,5 +18,5 @@ public partial class PrepReadyAction : Action
         InGameConsole.ShowPassive(TextId.ReadyForWork.Get(LiveModeManager.GetDisplayName(SenderUid)));
     }
 
-    public static void SendReady() => new PrepReadyAction().Send();
+    public static void Send() => new PrepReadyAction().Enqueue();
 }

@@ -65,7 +65,7 @@ public partial class StoreSellableAction : Action
                     Food = food,
                     FoodType = StoreType.Food
                 };
-                action.Send();
+                action.Enqueue();
                 break;
             case Sellable.SellableType.Beverage:
                 int beverageId = sellable.id;
@@ -75,7 +75,7 @@ public partial class StoreSellableAction : Action
                     BeverageId = beverageId,
                     FoodType = StoreType.Beverage
                 };
-                action.Send();
+                action.Enqueue();
                 break;
             default:
                 Log.LogError($"StoreSellableAction.Send called with unsupported sellable type: {sellable.type}");

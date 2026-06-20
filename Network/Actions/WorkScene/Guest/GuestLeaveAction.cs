@@ -45,6 +45,6 @@ public partial class GuestLeaveAction : Action
             LeaveType = (byte)leaveType,
             TriggerLeaveBuff = triggerLeaveBuff
         };
-        action.Send();
+        action.Enqueue();
     }
 }

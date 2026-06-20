@@ -31,7 +31,7 @@ public partial class RejectAction : Action
     /// </summary>
     public static void SendAndDisconnect(int uid, TextId reasonId, params string[] args)
     {
-        new RejectAction { ReasonId = reasonId, ReasonArgs = args, WireTargetUid = uid }.Send();
+        new RejectAction { ReasonId = reasonId, ReasonArgs = args, WireTargetUid = uid }.Enqueue();
         MpWire.DisconnectClient(uid);
     }
 }

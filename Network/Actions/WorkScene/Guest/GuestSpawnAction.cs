@@ -26,6 +26,6 @@ public partial class GuestSpawnAction : Action
             RuntimeId = runtimeId,
             SpawnInfo = spawnInfo,
         };
-        action.Send();
+        action.Enqueue();
     }
 }

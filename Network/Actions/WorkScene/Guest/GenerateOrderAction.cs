@@ -69,6 +69,6 @@ public partial class GenerateOrderAction : Action
             NotShowInUI = orderData?.NotShowInUI ?? false,
             FreeOrder = orderData?.FreeOrder ?? false
         };
-        action.Send();
+        action.Enqueue();
     }
 }

@@ -23,9 +23,9 @@ public partial class DayAllReadyAction : Action
         DaySceneManagerPatch.OnDayOver();
     }
 
-    public static void Broadcast()
+    public static void Send()
     {
         if (!MpManager.IsRoomHost) return;
-        new DayAllReadyAction().Send();
+        new DayAllReadyAction().Enqueue();
     }
 }

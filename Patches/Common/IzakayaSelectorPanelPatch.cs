@@ -98,7 +98,7 @@ public partial class IzakayaSelectorPanelPatch
 
         // 全员一致 → 广播 CONFIRM_SELECT → 本地执行切换
         Log.LogMessage($"All peers match selection: {mySelect}, broadcasting CONFIRM and proceeding");
-        ConfirmIzakayaAction.Broadcast(mapLabel, level);
+        ConfirmIzakayaAction.Send(mapLabel, level);
         InGameConsole.ShowPassive(TextId.SelectedIzakaya.Get(mySelect));
 
         TryProceedWithConfirmedSelection(mapLabel, (IzakayaLevel)level);

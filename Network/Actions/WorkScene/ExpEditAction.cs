@@ -35,6 +35,6 @@ public partial class ExpEditAction : Action
         {
             Value = value,
             MathOp = mathOp
-        }.Send();
+        }.Enqueue();
     }
 }

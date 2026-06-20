@@ -24,9 +24,9 @@ public partial class PrepAllReadyAction : Action
         IzakayaConfigPannelPatch.PrepOver();
     }
 
-    public static void Broadcast()
+    public static void Send()
     {
         if (!MpManager.IsRoomHost) return;
-        new PrepAllReadyAction { PrepTable = PrepSceneManager.GetLocalPrepTableSnapshot() }.Send();
+        new PrepAllReadyAction { PrepTable = PrepSceneManager.GetLocalPrepTableSnapshot() }.Enqueue();
     }
 }

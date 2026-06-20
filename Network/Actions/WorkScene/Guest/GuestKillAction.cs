@@ -46,6 +46,6 @@ public partial class GuestKillAction : Action
             HostStateBeforeKill = hostStateBeforeKill,
             DeskCode = deskCode
         };
-        action.Send();
+        action.Enqueue();
     }
 }

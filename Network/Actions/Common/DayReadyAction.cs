@@ -18,5 +18,5 @@ public partial class DayReadyAction : Action
         InGameConsole.ShowPassive(TextId.ReadyForWork.Get(LiveModeManager.GetDisplayName(SenderUid)));
     }
 
-    public static void SendReady() => new DayReadyAction().Send();
+    public static void Send() => new DayReadyAction().Enqueue();
 }

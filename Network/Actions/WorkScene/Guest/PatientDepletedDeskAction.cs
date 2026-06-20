@@ -42,6 +42,6 @@ public partial class PatientDepletedDeskAction : Action
         {
             RuntimeId = runtimeId
         };
-        action.Send();
+        action.Enqueue();
     }
 }

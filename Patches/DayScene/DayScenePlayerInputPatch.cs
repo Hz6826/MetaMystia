@@ -22,7 +22,7 @@ public partial class DayScenePlayerInputPatch
             return SkipOriginal;
         }
         PlayerManager.LocalIsSprinting = true;
-        MoveSyncAction.SendSync();
+        MoveSyncAction.Send();
         return RunOriginal;
     }
 
@@ -31,7 +31,7 @@ public partial class DayScenePlayerInputPatch
     public static void OnSprintCanceled_Prefix()
     {
         PlayerManager.LocalIsSprinting = false;
-        MoveSyncAction.SendSync();
+        MoveSyncAction.Send();
     }
 
     [HarmonyPatch(nameof(DayScenePlayerInputGenerator.TryInteract))]

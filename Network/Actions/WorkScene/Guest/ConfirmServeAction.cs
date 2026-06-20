@@ -45,6 +45,6 @@ public partial class ConfirmServeAction : Action
             Beverage = SellableFood.FromSellable(beverage),
             SenderUid = senderUid == -1 ? PlayerManager.Local.Uid : senderUid
         };
-        action.Send();
+        action.Enqueue();
     }
 }

@@ -58,6 +58,6 @@ public partial class UpdatePrepAction : Action
         {
             PrepTable = prepTable
         };
-        action.Send();
+        action.Enqueue();
     }
 }

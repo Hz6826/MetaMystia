@@ -230,7 +230,7 @@ public abstract partial class Action
         LogAction(OnSendLogLevel, logStr);
     }
 
-    protected void Send(bool lowPriority = false)
+    protected void Enqueue(bool lowPriority = false)
     {
         if (!MpWire.CanSend) return;
         if (ShouldDiscardOnStory())

@@ -32,7 +32,7 @@ public partial class MoveSyncAction : Action
     }
 
     // Also send nightsync
-    public static void SendSync()
+    public static void Send()
     {
         if (!MpManager.CanSeeOnlinePlayers || !MpManager.IsConnected)
         {
@@ -52,7 +52,7 @@ public partial class MoveSyncAction : Action
 
         if (MpManager.LocalScene == Common.UI.Scene.WorkScene)
         {
-            NightMoveSyncAction.SendSync();
+            NightMoveSyncAction.Send();
             return;
         }
         else
@@ -71,7 +71,7 @@ public partial class MoveSyncAction : Action
                 Px = position.x,
                 Py = position.y
             };
-            action.Send(lowPriority: true);
+            action.Enqueue(lowPriority: true);
         }
     }
 }

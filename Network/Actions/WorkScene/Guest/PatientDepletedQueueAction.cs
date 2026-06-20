@@ -37,6 +37,6 @@ public partial class PatientDepletedQueueAction : Action
         {
             RuntimeId = runtimeId
         };
-        action.Send();
+        action.Enqueue();
     }
 }

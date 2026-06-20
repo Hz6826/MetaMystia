@@ -54,6 +54,6 @@ public partial class ServeSellableAction : Action
             SellableType = sellableType,
             SenderUid = senderUid == -1 ? PlayerManager.Local.Uid : senderUid
         };
-        action.Send();
+        action.Enqueue();
     }
 }

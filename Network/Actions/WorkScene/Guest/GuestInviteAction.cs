@@ -39,6 +39,6 @@ public partial class GuestInviteAction : Action
         new GuestInviteAction
         {
             InvitedGuestIds = invitedGuestIds ?? []
-        }.Send();
+        }.Enqueue();
     }
 }

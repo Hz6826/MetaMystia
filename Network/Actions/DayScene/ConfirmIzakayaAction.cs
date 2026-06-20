@@ -28,13 +28,13 @@ public partial class ConfirmIzakayaAction : Action
     /// <summary>
     /// 主机广播确认选店
     /// </summary>
-    public static void Broadcast(MapLabel mapLabel, int mapLevel)
+    public static void Send(MapLabel mapLabel, int mapLevel)
     {
         var action = new ConfirmIzakayaAction
         {
             MapLabel = mapLabel,
             MapLevel = mapLevel
         };
-        action.Send();
+        action.Enqueue();
     }
 }

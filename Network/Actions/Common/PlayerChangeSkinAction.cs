@@ -37,6 +37,6 @@ public partial class PlayerChangeSkinAction : Action
         {
             Skin = skin
         };
-        action.Send();
+        action.Enqueue();
     }
 }

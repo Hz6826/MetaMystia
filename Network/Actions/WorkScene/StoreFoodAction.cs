@@ -31,6 +31,6 @@ public partial class StoreFoodAction : Action
         {
             Food = food
         };
-        action.Send();
+        action.Enqueue();
     }
 }

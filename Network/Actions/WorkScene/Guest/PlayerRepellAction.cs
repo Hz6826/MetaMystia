@@ -27,6 +27,6 @@ public partial class PlayerRepellAction : Action
         {
             RuntimeId = runtimeId
         };
-        action.Send();
+        action.Enqueue();
     }
 }

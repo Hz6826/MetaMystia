@@ -48,6 +48,6 @@ public partial class MessageAction : Action
     {
         if (!LiveModeManager.SuppressFloatingChatBubbles)
             FloatingTextHelper.ShowFloatingTextSelfOnMainThread(LiveModeManager.MaskMessage(message));
-        CreateMsgAction(message).Send();
+        CreateMsgAction(message).Enqueue();
     }
 }

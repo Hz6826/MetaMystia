@@ -35,6 +35,6 @@ public partial class FundEditAction : Action
         {
             Value = value,
             MathOp = mathOp
-        }.Send();
+        }.Enqueue();
     }
 }

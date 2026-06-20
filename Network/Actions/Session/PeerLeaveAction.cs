@@ -26,10 +26,10 @@ public partial class PeerLeaveAction : Action
         }
     }
 
-    public static void BroadcastPeerLeave(int leavingUid)
+    public static void Send(int leavingUid)
     {
         if (!MpManager.IsRoomHost) return;
         var action = new PeerLeaveAction { PeerUid = leavingUid };
-        action.Send();
+        action.Enqueue();
     }
 }

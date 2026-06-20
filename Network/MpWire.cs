@@ -135,7 +135,7 @@ public static partial class MpWire
             }
             Session.EnterDirectClientRoom();
             await Task.Run(() => _tcp.ConnectClient(host, port, ConnectTimeoutMs));
-            HelloAction.SendHello();
+            HelloAction.Send();
             Log.LogMessage($"[C] Connected to {host}:{port}");
             return true;
         }
@@ -222,12 +222,12 @@ public static partial class MpWire
         // 客机端：握手完成后，让 DirectTcp 把上行链路的 fromUid 同步为真实 HostUid
         _tcp?.SetUplinkUid(Session.HostUid);
         SceneTransitAction.Send(MpManager.LocalScene);
-        CommandScheduler.EnqueueInterval(SyncActionCommandId, 0.5f, MoveSyncAction.SendSync);
+        CommandScheduler.EnqueueInterval(SyncActionCommandId, 0.5f, MoveSyncAction.Send);
         InGameConsole.ShowPassiveFromAnyThread(TextId.MultiplayerConnected.Get());
     }
 
     public static void OnPeerHandshakeComplete(int uid) =>
-        CommandScheduler.EnqueueInterval(SyncActionCommandId, 2f, MoveSyncAction.SendSync);
+        CommandScheduler.EnqueueInterval(SyncActionCommandId, 2f, MoveSyncAction.Send);
 
     // --- IO thread ---
 
@@ -354,7 +354,7 @@ public static partial class MpWire
         {
             var displayName = LiveModeManager.GetDisplayName(uid, peer.Id);
             InGameConsole.ShowPassiveFromAnyThread(TextId.PeerLeft.Get(displayName));
-            PeerLeaveAction.BroadcastPeerLeave(uid);
+            PeerLeaveAction.Send(uid);
             PlayerManager.RemovePeer(uid);
             MpManager.CheckContinueAfterDisconnect(uid, displayName);
         }

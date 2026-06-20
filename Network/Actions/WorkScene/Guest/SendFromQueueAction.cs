@@ -27,6 +27,6 @@ public partial class SendFromQueueAction : Action
         {
             RuntimeId = runtimeId,
         };
-        action.Send();
+        action.Enqueue();
     }
 }

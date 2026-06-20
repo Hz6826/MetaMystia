@@ -33,6 +33,6 @@ public partial class ExtractFromCookerAction : Action
         {
             GridIndex = gridIndex
         };
-        action.Send();
+        action.Enqueue();
     }
 }

@@ -44,11 +44,11 @@ public partial class PeerJoinAction : Action
     /// <summary>
     /// 主机向除 exceptUid 以外的所有客机广播新玩家加入
     /// </summary>
-    public static void BroadcastExcept(int newPeerUid, PlayerInfo peerInfo)
+    public static void Send(int exceptUid, PlayerInfo peerInfo)
     {
         if (!MpManager.IsRoomHost) return;
         if (PlayerManager.Peers.Count <= 1) return;
 
-        new PeerJoinAction { PeerInfo = peerInfo, WireExceptUid = newPeerUid }.Send();
+        new PeerJoinAction { PeerInfo = peerInfo, WireExceptUid = exceptUid }.Enqueue();
     }
 }

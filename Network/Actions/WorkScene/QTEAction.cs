@@ -36,6 +36,6 @@ public partial class QTEAction : Action
             GridIndex = gridIndex,
             QTEScore = qteScore
         };
-        action.Send();
+        action.Enqueue();
     }
 }

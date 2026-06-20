@@ -35,6 +35,6 @@ public partial class PassionEditAction : Action
         {
             Value = value,
             MathOp = mathOp
-        }.Send();
+        }.Enqueue();
     }
 }

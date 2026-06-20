@@ -42,6 +42,6 @@ public partial class EvaluateOrderAction : Action
             Beverage = SellableFood.FromSellable(beverage),
             EvalResult = result
         };
-        action.Send();
+        action.Enqueue();
     }
 }

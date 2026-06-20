@@ -37,8 +37,8 @@ public partial class IzakayaCloseAction : Action
     /// <summary>
     /// 主机 → 所有客机：广播打烊命令
     /// </summary>
-    public static void Broadcast()
+    public static void Send()
     {
-        new IzakayaCloseAction().Send();
+        new IzakayaCloseAction().Enqueue();
     }
 }

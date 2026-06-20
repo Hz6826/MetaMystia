@@ -10,14 +10,14 @@ public partial class PingAction : Action
     protected override BepInEx.Logging.LogLevel OnSendLogLevel => BepInEx.Logging.LogLevel.Debug;
     public override void OnReceivedDerived()
     {
-        PongAction.SendPong(Id, MpWire.NowMs);
+        PongAction.Send(Id, MpWire.NowMs);
     }
 
     /// <summary>
     /// 客机→主机发送 Ping
     /// </summary>
-    public static void SendPing(int id)
+    public static void Send(int id)
     {
-        new PingAction { Id = id }.Send();
+        new PingAction { Id = id }.Enqueue();
     }
 }

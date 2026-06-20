@@ -41,6 +41,6 @@ public partial class TipEditAction : Action
             ComboBuff = comboBuff,
             MoodBuff = moodBuff,
             ExtraBuff = extraBuff
-        }.Send();
+        }.Enqueue();
     }
 }

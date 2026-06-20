@@ -55,6 +55,6 @@ public partial class NightCookAction : Action
             RecipeId = recipeId,
             Food = food
         };
-        action.Send();
+        action.Enqueue();
     }
 }

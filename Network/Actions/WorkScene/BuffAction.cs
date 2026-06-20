@@ -63,6 +63,6 @@ public partial class BuffAction : Action
 
     public static void Send(QTEBuff buff)
     {
-        new BuffAction { Buff = buff }.Send();
+        new BuffAction { Buff = buff }.Enqueue();
     }
 }

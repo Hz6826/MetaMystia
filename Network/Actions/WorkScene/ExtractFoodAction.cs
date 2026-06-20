@@ -33,6 +33,6 @@ public partial class ExtractFoodAction : Action
         {
             Food = food
         };
-        action.Send();
+        action.Enqueue();
     }
 }

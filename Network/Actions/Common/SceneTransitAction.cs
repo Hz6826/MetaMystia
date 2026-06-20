@@ -37,6 +37,6 @@ public partial class SceneTransitAction : Action
         {
             Scene = scene,
         };
-        action.Send();
+        action.Enqueue();
     }
 }

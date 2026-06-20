@@ -79,7 +79,7 @@ public partial class HelloAckAction : Action
     /// <summary>
     /// 主机向指定客机发送 HelloAck
     /// </summary>
-    public static void SendTo(int clientUid)
+    public static void Send(int clientUid)
     {
         // 收集已有 peer（不含新加入者自身）
         var existingPeers = new System.Collections.Generic.List<PlayerInfo>();
@@ -97,6 +97,6 @@ public partial class HelloAckAction : Action
             HostInfo = hostInfo,
             ExistingPeers = existingPeers.ToArray(),
             WireTargetUid = clientUid,
-        }.Send();
+        }.Enqueue();
     }
 }

@@ -26,7 +26,7 @@ public partial class NightMoveSyncAction : Action
             peer.NightSyncFromPeer(Speed, new UnityEngine.Vector2(Vx, Vy), new UnityEngine.Vector2(Px, Py));
     }
 
-    public static void SendSync()
+    public static void Send()
     {
         if (!MpManager.CanSeeOnlinePlayers || !MpManager.IsConnected || MpManager.LocalScene != Common.UI.Scene.WorkScene) return;
         if (!PlayerManager.CharacterSpawnedAndInitialized) return;
@@ -39,6 +39,6 @@ public partial class NightMoveSyncAction : Action
             Px = position.x,
             Py = position.y,
             Speed = PlayerManager.Local.Speed
-        }.Send(lowPriority: true);
+        }.Enqueue(lowPriority: true);
     }
 }
