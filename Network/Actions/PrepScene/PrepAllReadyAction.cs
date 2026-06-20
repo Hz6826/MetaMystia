@@ -14,7 +14,7 @@ public partial class PrepAllReadyAction : Action
     [CheckScene(Common.UI.Scene.IzakayaPrepScene)]
     public override void OnReceivedDerived()
     {
-        if (SenderUid != MpConstants.HostUid)
+        if (SenderUid != MpManager.Session.HostUid)
         {
             Log.LogWarning($"PrepAllReady from non-host uid={SenderUid}, ignoring");
             return;

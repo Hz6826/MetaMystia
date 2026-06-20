@@ -13,7 +13,7 @@ public partial class DayAllReadyAction : Action
     [CheckScene(Common.UI.Scene.DayScene)]
     public override void OnReceivedDerived()
     {
-        if (SenderUid != MpConstants.HostUid)
+        if (SenderUid != MpManager.Session.HostUid)
         {
             Log.LogWarning($"DayAllReady from non-host uid={SenderUid}, ignoring");
             return;

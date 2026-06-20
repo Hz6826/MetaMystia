@@ -204,6 +204,8 @@ public static partial class MpWire
 
     public static void OnHandshakeComplete(string hostId)
     {
+        // 客机端：握手完成后，让 DirectTcp 把上行链路的 fromUid 同步为真实 HostUid
+        _tcp?.SetUplinkUid(Session.HostUid);
         SceneTransitAction.Send(MpManager.LocalScene);
         CommandScheduler.EnqueueInterval(SyncActionCommandId, 0.5f, MoveSyncAction.SendSync);
         InGameConsole.ShowPassiveFromAnyThread(TextId.MultiplayerConnected.Get());
@@ -284,7 +286,7 @@ public static partial class MpWire
         var action = packet.Action;
         if (action == null) return;
 
-        if (Session.IsRoomHost && fromUid != MpConstants.HostUid && ShouldRelay(action))
+        if (Session.IsRoomHost && fromUid != Session.HostUid && ShouldRelay(action))
         {
             action.SenderUid = fromUid;
             _outbox.Enqueue(new Outbound(
@@ -296,7 +298,7 @@ public static partial class MpWire
 
     private static void OnWirePeerLeft(int uid)
     {
-        if (Session.IsRoomHost && uid != MpConstants.HostUid)
+        if (Session.IsRoomHost && uid != Session.HostUid)
             PluginManager.Instance?.RunOnMainThread(() => OnHostClientLeft(uid));
         else if (Session.IsRoomClient)
             PluginManager.Instance?.RunOnMainThread(OnClientDisconnected);
@@ -308,7 +310,7 @@ public static partial class MpWire
         while (_inbox.TryDequeue(out var item))
         {
             // 主机：每条 TCP 连接对应真实 uid，可覆盖包体以防伪造。
-            // 客机：线层 fromUid 恒为 HostUid，真实发送者已在主机转发时写入包体 SenderUid。
+            // 客机：线层 fromUid 为 Session.HostUid（握手后由 DirectTcp 上行链路 uid 提供），真实发送者已在主机转发时写入包体 SenderUid。
             if (Session.IsRoomHost)
                 item.Action.SenderUid = item.FromUid;
             item.Action.OnReceived();

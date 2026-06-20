@@ -54,8 +54,10 @@ public partial class HelloAckAction : Action
         PlayerManager.Local.Uid = AssignedUid;
         Log.LogMessage($"Assigned UID: {AssignedUid}");
 
-        // 注册主机为 peer (uid=0)
-        HostInfo.Uid = 0;
+        // 记录主机下发的真实 HostUid（直连模式下为 0，服务端模式下由服务端分配）
+        MpWire.Session.AssignHostUid(HostInfo.Uid);
+
+        // 注册主机为 peer
         PlayerManager.AddPeer(HostInfo);
 
         // 注册已有的其他 peer

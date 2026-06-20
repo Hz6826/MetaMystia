@@ -65,8 +65,12 @@ public sealed class MpSession
         SyncScope = SyncScope.Room;
         RoomRole = RoomRole.Client;
         RoomId = "direct";
-        HostUid = MpConstants.HostUid;
+        // HostUid 由 HelloAck 下发；握手前保持 UnassignedUid。
+        HostUid = MpConstants.UnassignedUid;
     }
+
+    /// <summary>客机收到 HelloAck 后记录主机下发的真实 HostUid。</summary>
+    public void AssignHostUid(int hostUid) => HostUid = hostUid;
 
     /// <summary>已连上中继、处于公域；不在任何玩法房间内。</summary>
     public void EnterRelayPublic()

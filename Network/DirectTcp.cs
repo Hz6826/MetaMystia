@@ -93,6 +93,7 @@ internal sealed class DirectTcp
     private TcpListener _listener;
     private readonly Dictionary<int, Link> _clients = new();
     private Link _uplink;
+    private int _uplinkUid = MpConstants.UnassignedUid;
     private int _nextUid;
     private bool _isHost;
 
@@ -105,6 +106,10 @@ internal sealed class DirectTcp
     public bool IsHost => _isHost;
     public bool HasClients => _clients.Count > 0;
     public bool IsClientConnected => _uplink != null;
+
+    /// <summary>客机端上行链路对应的对端 UID（主机或中继服务端），由 MpWire 在握手完成后设置。</summary>
+    public int UplinkUid => _uplinkUid;
+    public void SetUplinkUid(int uid) => _uplinkUid = uid;
 
     public void StartHost(int port, bool ipv6)
     {
@@ -126,6 +131,7 @@ internal sealed class DirectTcp
     {
         Stop();
         _isHost = false;
+        _uplinkUid = MpConstants.UnassignedUid;
         TcpClient tcp = IPAddress.TryParse(host, out var addr) && addr.AddressFamily == AddressFamily.InterNetworkV6
             ? new TcpClient(AddressFamily.InterNetworkV6)
             : new TcpClient();
@@ -180,6 +186,7 @@ internal sealed class DirectTcp
         {
             CloseLink(_uplink);
             _uplink = null;
+            _uplinkUid = MpConstants.UnassignedUid;
         }
         DisconnectAll();
         try { _listener?.Stop(); } catch { }
@@ -197,7 +204,7 @@ internal sealed class DirectTcp
         }
         else if (_uplink != null)
         {
-            PumpLink(MpConstants.HostUid, _uplink);
+            PumpLink(_uplinkUid, _uplink);
         }
     }
 
@@ -253,9 +260,11 @@ internal sealed class DirectTcp
         }
         else if (_uplink == link)
         {
+            int uplinkUid = _uplinkUid;
             CloseLink(link);
             _uplink = null;
-            _onClientLeft(MpConstants.HostUid);
+            _uplinkUid = MpConstants.UnassignedUid;
+            _onClientLeft(uplinkUid);
         }
     }
 
