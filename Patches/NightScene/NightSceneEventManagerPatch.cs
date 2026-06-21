@@ -27,6 +27,18 @@ public static partial class NightSceneEventManagerPatch
         __instance.GetWholeNightTime = getWholeNightTime;
     }
 
+    [HarmonyPatch(nameof(EventManager.StartGuestInstantiateLoop))]
+    [HarmonyPostfix]
+    public static void StartGuestInstantiateLoop_Postfix(EventManager __instance)
+    {
+        if (MpManager.IsConnectedClient && __instance.onCreatorBoxGuestInstantiateLoop != null)
+        {
+            __instance.onCreatorBoxGuestInstantiateLoop = null;
+            Log.Warning("已临时禁用造物者之盒协程。");
+        }
+    }
+    
+
     [HarmonyPatch(nameof(EventManager.Fever))]
     [HarmonyPrefix]
     public static void Fever_Prefix(EventManager __instance, int durationSec)
