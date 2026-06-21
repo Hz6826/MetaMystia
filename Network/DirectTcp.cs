@@ -151,9 +151,12 @@ internal sealed class DirectTcp
     {
         if (_isHost)
         {
-            if (targetUid is int uid && _clients.TryGetValue(uid, out var one))
+            // 指定 targetUid 时只发给该连接；找不到则丢弃，不能退化为广播
+            // （RejectAction 等会在入队后立即 DisconnectClient，目标可能已离线）。
+            if (targetUid is int uid)
             {
-                TryEnqueue(one, framed, dropIfCongested);
+                if (_clients.TryGetValue(uid, out var one))
+                    TryEnqueue(one, framed, dropIfCongested);
                 return;
             }
             foreach (var kvp in _clients)
