@@ -78,6 +78,7 @@ static partial class Checks
         await ChatFiltering();
         await Administration();
         await ServerChat();
+        await WelcomeAndReload();
         await IncrementalResources();
         await ErrorDetails();
         await Stages();

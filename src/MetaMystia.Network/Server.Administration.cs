@@ -37,6 +37,39 @@ public sealed partial class Server
         return await result.Task.ConfigureAwait(false);
     }
 
+    public async Task<NetworkErrorCode> ReloadTextSettingsAsync(ServerTextSettings settings)
+    {
+        settings.Validate();
+        var copy = settings with
+        {
+            ChatFilter = settings.ChatFilter with { Words = settings.ChatFilter.Words.ToArray() },
+            WelcomeMessages = settings.WelcomeMessages.ToArray()
+        };
+        if (Volatile.Read(ref stopping) != 0 || Volatile.Read(ref started) == 0) return NetworkErrorCode.ServerStopped;
+        var result = new TaskCompletionSource<NetworkErrorCode>(TaskCreationOptions.RunContinuationsAsynchronously);
+        try
+        {
+            await events.Writer.WriteAsync(() =>
+            {
+                if (Volatile.Read(ref stopping) != 0) { result.TrySetResult(NetworkErrorCode.ServerStopped); return; }
+                ApplyTextSettings(copy);
+                Log(ServerLogLevel.Info, $"配置已重载：欢迎公告 {welcomeMessages.Length} 条，有效过滤词条 {chatWords.Length}，聊天正文日志{(logChat ? "开启" : "关闭")}");
+                result.TrySetResult(NetworkErrorCode.None);
+            }).ConfigureAwait(false);
+        }
+        catch (ChannelClosedException) { return NetworkErrorCode.ServerStopped; }
+        return await result.Task.ConfigureAwait(false);
+    }
+
+    private void ApplyTextSettings(ServerTextSettings settings)
+    {
+        chatWords = settings.ChatFilter.Enabled
+            ? settings.ChatFilter.Words.Where(w => !string.IsNullOrWhiteSpace(w)).Distinct().ToArray() : [];
+        chatComparison = settings.ChatFilter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        logChat = settings.LogChat;
+        welcomeMessages = settings.WelcomeMessages.Select(message => Protocol.Pack(new ChatPayload { Message = message })).ToArray();
+    }
+
     public async Task<NetworkErrorCode> SayAsync(string message)
     {
         if (Volatile.Read(ref stopping) != 0 || Volatile.Read(ref started) == 0) return NetworkErrorCode.ServerStopped;
@@ -53,7 +86,7 @@ public sealed partial class Server
                     // UID 0 保留给服务端；客户端发送者身份始终由连接覆盖。
                     var frame = new Frame(Kind.Data, body, Type: (ushort)GameMessageType.Chat, Route: Route.World);
                     foreach (var peer in peers.Where(p => p.Player != null && !p.Rejected)) peer.Wire.Send(frame);
-                    if (options.LogChat) Log(ServerLogLevel.Chat, $"服务器: {ServerLogEntry.Quote(message)}");
+                    if (logChat) Log(ServerLogLevel.Chat, $"服务器: {ServerLogEntry.Quote(message)}");
                 }
                 Log(ServerLogLevel.Info, $"管理员操作 command=Say，结果={error}");
                 result.TrySetResult(error);

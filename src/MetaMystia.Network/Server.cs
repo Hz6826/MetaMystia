@@ -22,8 +22,10 @@ public sealed partial class Server : IAsyncDisposable
         internal readonly HashSet<long> SentResources = [];
     }
     private readonly ServerOptions options;
-    private readonly string[] chatWords;
-    private readonly StringComparison chatComparison;
+    private string[] chatWords = [];
+    private StringComparison chatComparison;
+    private bool logChat;
+    private byte[][] welcomeMessages = [];
     private readonly Dictionary<ushort, MessageRule> rules;
     private readonly Channel<Action> events = Channel.CreateBounded<Action>(1024);
     private readonly HashSet<Peer> peers = [];
@@ -46,9 +48,9 @@ public sealed partial class Server : IAsyncDisposable
     {
         if (options.MaxPlayers < 1 || options.MaxPlayers > 256 || options.Timeout < TimeSpan.FromMilliseconds(200)) throw new ArgumentOutOfRangeException(nameof(options));
         this.options = options;
-        chatWords = options.ChatFilter.Enabled
-            ? options.ChatFilter.Words.Where(w => !string.IsNullOrWhiteSpace(w)).Distinct().ToArray() : [];
-        chatComparison = options.ChatFilter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        var textSettings = new ServerTextSettings { ChatFilter = options.ChatFilter, LogChat = options.LogChat, WelcomeMessages = options.WelcomeMessages };
+        textSettings.Validate();
+        ApplyTextSettings(textSettings);
         maxPlayers = options.MaxPlayers;
         rules = options.Messages.ToDictionary(r => r.Id, r => r with { Routes = r.Routes.ToArray() });
         if (rules.Values.Any(r => r.Id == 0 || r.MaxBytes < 0 || r.MaxBytes > 65536 ||
@@ -181,6 +183,8 @@ public sealed partial class Server : IAsyncDisposable
                     Join(p, lanRoom!, 0);
                 }
                 p.Wire.Send(new(Kind.Welcome, Protocol.Pack(CaptureUpdate(p)), newUid));
+                foreach (var body in welcomeMessages)
+                    p.Wire.Send(new(Kind.Data, body, Type: (ushort)GameMessageType.Chat, Route: Route.World));
                 Publish(p);
                 Log(ServerLogLevel.Info, $"玩家上线 uid={newUid} name={ServerLogEntry.Quote(player.Name)}，在线 {peers.Count(x => x.Player != null)}/{maxPlayers}");
                 return;
@@ -362,7 +366,7 @@ public sealed partial class Server : IAsyncDisposable
                 p.Wire.Send(new(Kind.ChatRejected, Protocol.WriteError(error)));
                 return;
             }
-            if (options.LogChat)
+            if (logChat)
                 Log(ServerLogLevel.Chat, $"uid={p.Player!.Uid} name={ServerLogEntry.Quote(p.Player.Name)}: {ServerLogEntry.Quote(message!)}");
         }
         if (!rules.TryGetValue(f.Type, out var rule) || !rule.Routes.Contains(f.Route) || f.Body.Length > rule.MaxBytes) throw new InvalidDataException("Unregistered route");

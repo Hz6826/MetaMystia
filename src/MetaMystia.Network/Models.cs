@@ -114,6 +114,7 @@ public sealed record ServerOptions
     public MessageRule[] Messages { get; init; } = MetaMystia.Network.Messages.DefaultRules();
     public ChatFilterOptions ChatFilter { get; init; } = new();
     public bool LogChat { get; init; }
+    public string[] WelcomeMessages { get; init; } = [];
     internal string? LanKey { get; init; }
 }
 

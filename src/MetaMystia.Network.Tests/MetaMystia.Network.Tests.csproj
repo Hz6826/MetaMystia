@@ -4,4 +4,5 @@
   <ItemGroup><ProjectReference Include="../MetaMystia.Network/MetaMystia.Network.csproj" /></ItemGroup>
   <ItemGroup><Compile Include="../MetaMystia.Mod/Multiplayer/GameMessages.cs" Link="GameMessages.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../MetaMystia.Server/ServerCommands.cs" Link="ServerCommands.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../MetaMystia.Server/ServerConfiguration.cs" Link="ServerConfiguration.cs" /></ItemGroup>
 </Project>

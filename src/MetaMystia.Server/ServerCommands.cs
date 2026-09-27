@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using MetaMystia.Network;
 
 namespace MetaMystia.Hosting;
@@ -5,7 +7,7 @@ namespace MetaMystia.Hosting;
 internal static class ServerCommands
 {
     // 返回 false 表示停止服务端；空行不执行任何操作。
-    public static async Task<bool> Execute(string line, Server server, Action<ServerLogLevel, string> write)
+    public static async Task<bool> Execute(string line, Server server, Action<ServerLogLevel, string> write, string? configDirectory = null)
     {
         var args = line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
         if (args.Length == 0) return true;
@@ -13,7 +15,20 @@ internal static class ServerCommands
         switch (command)
         {
             case "help" when args.Length == 1:
-                write(ServerLogLevel.Info, "help | players | rooms | kick <uid> | leave <uid> | maxplayers [1–256] | say <内容> | stop");
+                write(ServerLogLevel.Info, "help | players | rooms | kick <uid> | leave <uid> | maxplayers [1–256] | say <内容> | reload | stop");
+                break;
+            case "reload" when args.Length == 1:
+                try
+                {
+                    var settings = ServerConfiguration.Load(configDirectory ?? AppContext.BaseDirectory);
+                    var reloadError = await server.ReloadTextSettingsAsync(settings);
+                    write(reloadError == NetworkErrorCode.None ? ServerLogLevel.Info : ServerLogLevel.Warning,
+                        reloadError == NetworkErrorCode.None ? "公告、聊天日志开关和敏感词配置已生效。" : "服务器正在关闭，配置未应用。");
+                }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
+                {
+                    write(ServerLogLevel.Warning, $"配置重载失败，保留原配置：{ServerLogEntry.Quote(e.Message)}");
+                }
                 break;
             case "stop" when args.Length == 1:
                 write(ServerLogLevel.Info, "收到 stop 命令。");
