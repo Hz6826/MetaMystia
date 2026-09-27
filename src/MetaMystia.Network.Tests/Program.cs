@@ -75,6 +75,7 @@ static partial class Checks
         await RoomCodes();
         await RoomExits();
         await ForwardedMessageChecks();
+        await ChatFiltering();
         await IncrementalResources();
         await ErrorDetails();
         await Stages();

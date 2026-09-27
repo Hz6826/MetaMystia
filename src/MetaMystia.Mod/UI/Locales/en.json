@@ -13,6 +13,8 @@
     "NetworkPlayerUnavailable": "Join a room from the main menu or free daytime.",
     "NetworkRoomEnded": "The room is missing or this membership has ended.",
     "NetworkLimit": "Capacity must be 1–256 and within the standalone server limit.",
+    "NetworkChatFiltered": "Message contains a blocked word and was not sent.",
+    "NetworkInvalidChat": "Chat message is invalid or too long and was not sent.",
     "NetworkDuplicateName": "That player name is already in use. Choose another name.",
     "NetworkResources": "Resources are not ready or exceed the server data limit. Check the loaded packages.",
     "NetworkTimeout": "The network operation timed out or was cancelled. Check the connection status before retrying.",

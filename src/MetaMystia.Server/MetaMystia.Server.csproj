@@ -2,4 +2,5 @@
   <Import Project="../MetaMystia.Network/Network.props" />
   <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
   <ItemGroup><ProjectReference Include="../MetaMystia.Network/MetaMystia.Network.csproj" /></ItemGroup>
+  <ItemGroup><None Update="chat-filter.example.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
 </Project>

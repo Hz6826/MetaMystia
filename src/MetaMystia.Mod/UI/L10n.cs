@@ -30,6 +30,8 @@ public enum TextId
     NetworkRoomEnded,
     NetworkLimit,
     NetworkDuplicateName,
+    NetworkChatFiltered,
+    NetworkInvalidChat,
     NetworkResources,
     NetworkTimeout,
     NetworkOverload,

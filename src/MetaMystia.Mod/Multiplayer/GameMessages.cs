@@ -70,7 +70,9 @@ public static class GameMessages
         var rule = rules[type];
         if (rule.HostOnly && !GameSession.IsRoomHost) return;
         var client = GameSession.Client;
-        var body = MemoryPackSerializer.Serialize(message);
+        var body = message is ChatMessage chat
+            ? MemoryPackSerializer.Serialize(new ChatPayload { Message = chat.Message })
+            : MemoryPackSerializer.Serialize(message);
         if (message.WireTargetUid is int target) client.SendToPlayer(target, (ushort)type, body);
         else if (!rule.RoomScoped) client.SendToWorld((ushort)type, body);
         else if (rule.Routes.Contains(Route.Host) && (!GameSession.IsRoomHost || !rule.Routes.Contains(Route.Room)))
@@ -81,9 +83,19 @@ public static class GameMessages
     public static void Receive(ReceivedMessage received)
     {
         MultiplayerMessage message;
-        try { message = MemoryPackSerializer.Deserialize<MultiplayerMessage>(received.Body); }
+        try
+        {
+            if (received.Type == (ushort)GameMessageType.Chat)
+            {
+                var chat = MemoryPackSerializer.Deserialize<ChatPayload>(received.Body);
+                if (chat?.Message == null) return;
+                message = new ChatMessage { Message = chat.Message };
+            }
+            else message = MemoryPackSerializer.Deserialize<MultiplayerMessage>(received.Body)!;
+        }
         catch (MemoryPackSerializationException) { return; }
-        if (message == null || (ushort)TypeOf(message) != received.Type) return;
+        if (message == null || (ushort)TypeOf(message) != received.Type
+            || message is ChatMessage { Message: null }) return;
         message.SenderUid = received.Context.Sender;
         message.Context = received.Context;
         message.Connection = GameSession.Client;

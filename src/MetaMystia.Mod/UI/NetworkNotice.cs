@@ -38,6 +38,8 @@ public static class NetworkNotice
         NetworkErrorCode.HostOnly => TextId.MpKickHostOnly,
         NetworkErrorCode.InvalidLimit => TextId.NetworkLimit,
         NetworkErrorCode.DuplicateName => TextId.NetworkDuplicateName,
+        NetworkErrorCode.ChatFiltered => TextId.NetworkChatFiltered,
+        NetworkErrorCode.InvalidChat => TextId.NetworkInvalidChat,
         NetworkErrorCode.WorldDataBudgetExceeded or NetworkErrorCode.ResourcesNotReadyOrInvalid or NetworkErrorCode.InvalidHello => TextId.NetworkResources,
         NetworkErrorCode.ReceiveTimeout or NetworkErrorCode.HandshakeTimeout or NetworkErrorCode.JoinTimeout or NetworkErrorCode.ManagementUnconfirmed or NetworkErrorCode.CancelUnconfirmed or NetworkErrorCode.LeaveUnconfirmed => TextId.NetworkTimeout,
         NetworkErrorCode.SendQueueFull or NetworkErrorCode.ReceiveQueueFull or NetworkErrorCode.ServerQueueFull or NetworkErrorCode.TooManyRequests => TextId.NetworkOverload,

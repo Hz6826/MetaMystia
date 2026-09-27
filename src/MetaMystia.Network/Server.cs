@@ -21,6 +21,8 @@ public sealed class Server : IAsyncDisposable
         internal readonly HashSet<long> SentResources = [];
     }
     private readonly ServerOptions options;
+    private readonly string[] chatWords;
+    private readonly StringComparison chatComparison;
     private readonly Dictionary<ushort, MessageRule> rules;
     private readonly Channel<Action> events = Channel.CreateBounded<Action>(1024);
     private readonly HashSet<Peer> peers = [];
@@ -42,6 +44,9 @@ public sealed class Server : IAsyncDisposable
     {
         if (options.MaxPlayers < 1 || options.MaxPlayers > 256 || options.Timeout < TimeSpan.FromMilliseconds(200)) throw new ArgumentOutOfRangeException(nameof(options));
         this.options = options;
+        chatWords = options.ChatFilter.Enabled
+            ? options.ChatFilter.Words.Where(w => !string.IsNullOrWhiteSpace(w)).Distinct().ToArray() : [];
+        chatComparison = options.ChatFilter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         maxPlayers = options.MaxPlayers;
         rules = options.Messages.ToDictionary(r => r.Id, r => r with { Routes = r.Routes.ToArray() });
         if (rules.Values.Any(r => r.Id == 0 || r.MaxBytes < 0 || r.MaxBytes > 65536 ||
@@ -323,6 +328,16 @@ public sealed class Server : IAsyncDisposable
 
     private void RouteMessage(Peer p, Frame f)
     {
+        bool chat = f.Type == (ushort)GameMessageType.Chat;
+        if (chat && f.Route == Route.World && rules.ContainsKey(f.Type))
+        {
+            var error = CheckChat(f.Body);
+            if (error != NetworkErrorCode.None)
+            {
+                p.Wire.Send(new(Kind.ChatRejected, Protocol.WriteError(error)));
+                return;
+            }
+        }
         if (!rules.TryGetValue(f.Type, out var rule) || !rule.Routes.Contains(f.Route) || f.Body.Length > rule.MaxBytes) throw new InvalidDataException("Unregistered route");
         Room? room = rooms.GetValueOrDefault(p.Room);
         if (rule.RoomScoped && (room == null || f.Room != room.Id || f.Membership != p.Player!.Membership)) return;
@@ -339,7 +354,7 @@ public sealed class Server : IAsyncDisposable
         {
             bool send = f.Route switch
             {
-                Route.World => target != p,
+                Route.World => chat || target != p,
                 Route.Room => target != p && target.Room == p.Room,
                 Route.Host => target.Player!.Uid == room?.Host,
                 Route.Player => target.Player!.Uid == f.Target,
@@ -349,6 +364,19 @@ public sealed class Server : IAsyncDisposable
             if (f.RecipientMembership != 0 && f.RecipientMembership != target.Player!.Membership) continue;
             target.Wire.Send(source with { RecipientMembership = rule.RoomScoped ? target.Player!.Membership : 0 });
         }
+    }
+
+    private NetworkErrorCode CheckChat(byte[] body)
+    {
+        if (body.Length > 4096) return NetworkErrorCode.InvalidChat;
+        ChatPayload? chat;
+        try { chat = Protocol.Read<ChatPayload>(body); }
+        catch (Exception e) when (e is InvalidDataException or MemoryPack.MemoryPackSerializationException)
+        { return NetworkErrorCode.InvalidChat; }
+        if (chat == null || string.IsNullOrWhiteSpace(chat.Message) || chat.Message.Length > ChatPayload.MaxLength)
+            return NetworkErrorCode.InvalidChat;
+        return chatWords.Any(word => chat.Message.Contains(word, chatComparison))
+            ? NetworkErrorCode.ChatFiltered : NetworkErrorCode.None;
     }
 
     private Snapshot Capture(Peer? viewer) => new()

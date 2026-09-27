@@ -34,6 +34,7 @@ public sealed class Client : IDisposable
     public Snapshot State { get { lock (gate) return state.Copy(); } }
     public event Action? StateChanged;
     public event Action<ReceivedMessage>? MessageReceived;
+    public event Action<NetworkError>? ChatRejected;
     public event Action<NetworkError>? ConnectionEnded;
     public event Action<Exception>? CallbackError;
     public Client(Versions? versions = null) => Versions = versions ?? Versions.Current;
@@ -270,6 +271,9 @@ public sealed class Client : IDisposable
     {
         switch (f.Kind)
         {
+            case Kind.ChatRejected:
+                var chatError = Protocol.ReadError(f.Body);
+                Invoke(() => ChatRejected?.Invoke(chatError)); break;
             case Kind.Rejected:
                 var error = Protocol.ReadError(f.Body);
                 // 拒绝原因优先于随后到达的 TCP 关闭通知。

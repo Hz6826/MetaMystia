@@ -9,7 +9,7 @@ static partial class Checks
     static async Task ForwardedMessageChecks()
     {
         var failures = new List<string>();
-        byte[] valid = MemoryPackSerializer.Serialize<MultiplayerMessage>(new ChatMessage());
+        byte[] valid = MemoryPackSerializer.Serialize(new ChatPayload { Message = "hello" });
         byte[] validRoom = MemoryPackSerializer.Serialize<MultiplayerMessage>(new NightCookMessage());
         byte[] mismatch = MemoryPackSerializer.Serialize<MultiplayerMessage>(new PingMessage());
         byte[] nil = MemoryPackSerializer.Serialize<MultiplayerMessage>(null);
@@ -30,7 +30,8 @@ static partial class Checks
                 await Pump(recipient.SetJoinableAsync(true));
                 await Pump(attacker.JoinRoomAsync(recipient.State.Room!.Id));
             }
-            int received = 0, callbacks = 0;
+            int received = 0, callbacks = 0, rejected = 0;
+            attacker.ChatRejected += _ => rejected++;
             MultiplayerMessage.Delivered.Clear();
             foreach (var client in new[] { recipient, observer })
             {
@@ -44,8 +45,9 @@ static partial class Checks
             }
             if (room) attacker.SendToRoom((ushort)GameMessageType.NightCook, body);
             else attacker.SendToWorld((ushort)GameMessageType.Chat, body);
-            await Until(() => received == (room ? 1 : 2));
-            bool survived = recipient.IsConnected && observer.IsConnected;
+            await Until(() => room ? received == 1 : rejected == 1);
+            bool survived = recipient.IsConnected && observer.IsConnected && attacker.IsConnected;
+            if (!room) Assert(received == 0, "非法聊天不转发且发送者保持连接");
             string scenario = $"{(room ? "房间" : "世界")}转发{name}";
             Console.WriteLine($"CHECK {scenario}: 接收者在线={survived}, 回调异常={callbacks}");
             if (!survived || callbacks != 0 || MultiplayerMessage.Delivered.Count != 0)

@@ -1,6 +1,6 @@
-using System.Data.Common;
 using MemoryPack;
 
+using MetaMystia.Network;
 using MetaMystia.UI;
 using SgrYuki;
 
@@ -13,14 +13,19 @@ namespace MetaMystia.Multiplayer.Messages;
 public partial class ChatMessage : MultiplayerMessage
 {
 
-    [MemoryPackIgnore]
-    private const int maxMessageLen = 1024;
-    public string Message { get; private set; }
+    public string Message { get; set; }
     protected override BepInEx.Logging.LogLevel OnReceiveLogLevel => BepInEx.Logging.LogLevel.Message;
     protected override BepInEx.Logging.LogLevel OnSendLogLevel => BepInEx.Logging.LogLevel.Message;
 
     public override void OnReceivedDerived()
     {
+        if (SenderUid == GameSession.Client.Uid)
+        {
+            InGameConsole.LogToConsole($"{LiveModeManager.GetLocalDisplayName()}: {LiveModeManager.MaskMessage(Message)}");
+            if (!LiveModeManager.SuppressFloatingChatBubbles)
+                FloatingTextHelper.ShowFloatingTextSelfOnMainThread(LiveModeManager.MaskMessage(Message));
+            return;
+        }
         var senderName = PlayerManager.GetPeerName(SenderUid);
         InGameConsole.AddPeerMessage(senderName, Message);
         if (!LiveModeManager.SuppressFloatingChatBubbles
@@ -31,22 +36,6 @@ public partial class ChatMessage : MultiplayerMessage
                 senderPeer.GetCharacterUnit(), LiveModeManager.MaskMessage(Message));
         }
     }
-    private static ChatMessage CreateMessage(string msg)
-    {
-        if (msg.Length <= maxMessageLen)
-        {
-            return new ChatMessage { Message = msg };
-        }
-        else
-        {
-            return new ChatMessage { Message = msg[..maxMessageLen] };
-        }
-    }
-
-    public static void Send(string message)
-    {
-        if (!LiveModeManager.SuppressFloatingChatBubbles)
-            FloatingTextHelper.ShowFloatingTextSelfOnMainThread(LiveModeManager.MaskMessage(message));
-        CreateMessage(message).Enqueue();
-    }
+    public static void Send(string message) =>
+        new ChatMessage { Message = message.Length <= ChatPayload.MaxLength ? message : message[..ChatPayload.MaxLength] }.Enqueue();
 }

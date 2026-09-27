@@ -47,6 +47,8 @@ public enum NetworkErrorCode : ushort
     SendFailed = 40,
     LeftDuringJoin = 41,
     InvalidServerMessage = 42,
+    ChatFiltered = 43,
+    InvalidChat = 44,
 }
 
 /// <summary>协议错误及可选上下文；版本指拒绝连接的一端。</summary>

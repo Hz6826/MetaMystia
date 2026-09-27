@@ -112,6 +112,7 @@ public sealed record ServerOptions
     public Versions Versions { get; init; } = Versions.Current;
     public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(15);
     public MessageRule[] Messages { get; init; } = MetaMystia.Network.Messages.DefaultRules();
+    public ChatFilterOptions ChatFilter { get; init; } = new();
     internal string? LanKey { get; init; }
 }
 

@@ -106,6 +106,7 @@ public static partial class GameSession
         if (lan != null) lan.Server.CallbackError += error => Log.Error($"Server callback: {error}");
         client.StateChanged += () => ApplyState(client);
         client.MessageReceived += GameMessages.Receive;
+        client.ChatRejected += error => InGameConsole.LogError(NetworkNotice.Describe(error));
         client.ConnectionEnded += reason =>
         {
             if (Client != client) return;

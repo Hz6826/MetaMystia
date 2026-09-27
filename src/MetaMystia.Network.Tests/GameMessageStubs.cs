@@ -36,7 +36,7 @@ namespace MetaMystia.Multiplayer.Messages
     public partial class PingMessage : MultiplayerMessage {}
     public class PongMessage : MultiplayerMessage {}
     [MemoryPackable]
-    public partial class ChatMessage : MultiplayerMessage {}
+    public partial class ChatMessage : MultiplayerMessage { public string Message { get; set; } = "hello"; }
     public class SelectIzakayaMessage : MultiplayerMessage {}
     public class ConfirmIzakayaMessage : MultiplayerMessage {}
     public class UpdatePrepMessage : MultiplayerMessage {}

@@ -867,12 +867,10 @@ public static partial class InGameConsole
         bool isMessage = cmd[0] != '/';
         if (isMessage)
         {
-            string localName = LiveModeManager.GetLocalDisplayName();
-            string displayMsg = LiveModeManager.MaskMessage(cmd);
-            LogToConsole($"{localName}: {displayMsg}");
-
             if (GameSession.IsOnline)
                 ChatMessage.Send(cmd);
+            else
+                LogToConsole($"{LiveModeManager.GetLocalDisplayName()}: {LiveModeManager.MaskMessage(cmd)}");
 
             closeConsole = true;
         }
