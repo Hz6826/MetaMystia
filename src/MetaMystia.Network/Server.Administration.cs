@@ -37,6 +37,32 @@ public sealed partial class Server
         return await result.Task.ConfigureAwait(false);
     }
 
+    public async Task<NetworkErrorCode> SayAsync(string message)
+    {
+        if (Volatile.Read(ref stopping) != 0 || Volatile.Read(ref started) == 0) return NetworkErrorCode.ServerStopped;
+        if (string.IsNullOrWhiteSpace(message) || message.Length > ChatPayload.MaxLength) return NetworkErrorCode.InvalidChat;
+        var body = Protocol.Pack(new ChatPayload { Message = message });
+        var result = new TaskCompletionSource<NetworkErrorCode>(TaskCreationOptions.RunContinuationsAsynchronously);
+        try
+        {
+            await events.Writer.WriteAsync(() =>
+            {
+                var error = Volatile.Read(ref stopping) != 0 ? NetworkErrorCode.ServerStopped : CheckChat(body, out _);
+                if (error == NetworkErrorCode.None)
+                {
+                    // UID 0 保留给服务端；客户端发送者身份始终由连接覆盖。
+                    var frame = new Frame(Kind.Data, body, Type: (ushort)GameMessageType.Chat, Route: Route.World);
+                    foreach (var peer in peers.Where(p => p.Player != null && !p.Rejected)) peer.Wire.Send(frame);
+                    if (options.LogChat) Log(ServerLogLevel.Chat, $"服务器: {ServerLogEntry.Quote(message)}");
+                }
+                Log(ServerLogLevel.Info, $"管理员操作 command=Say，结果={error}");
+                result.TrySetResult(error);
+            }).ConfigureAwait(false);
+        }
+        catch (ChannelClosedException) { return NetworkErrorCode.ServerStopped; }
+        return await result.Task.ConfigureAwait(false);
+    }
+
     private NetworkErrorCode Manage(ServerCommand command, int value)
     {
         if (command == ServerCommand.MaxPlayers)

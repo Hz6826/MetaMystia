@@ -7,7 +7,7 @@ using SgrYuki;
 namespace MetaMystia.Multiplayer.Messages;
 
 /// <summary>
-/// 任何玩家 → 所有玩家：发送聊天消息
+/// 玩家或服务端 → 所有玩家：发送聊天消息
 /// </summary>
 [MemoryPackable]
 public partial class ChatMessage : MultiplayerMessage
@@ -19,6 +19,11 @@ public partial class ChatMessage : MultiplayerMessage
 
     public override void OnReceivedDerived()
     {
+        if (SenderUid == 0)
+        {
+            InGameConsole.AddPeerMessage(TextId.ServerChatName.Get(), Message);
+            return;
+        }
         if (SenderUid == GameSession.Client.Uid)
         {
             InGameConsole.LogToConsole($"{LiveModeManager.GetLocalDisplayName()}: {LiveModeManager.MaskMessage(Message)}");

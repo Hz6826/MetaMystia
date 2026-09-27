@@ -13,11 +13,22 @@ internal static class ServerCommands
         switch (command)
         {
             case "help" when args.Length == 1:
-                write(ServerLogLevel.Info, "help | players | rooms | kick <uid> | leave <uid> | maxplayers [1–256] | stop");
+                write(ServerLogLevel.Info, "help | players | rooms | kick <uid> | leave <uid> | maxplayers [1–256] | say <内容> | stop");
                 break;
             case "stop" when args.Length == 1:
                 write(ServerLogLevel.Info, "收到 stop 命令。");
                 return false;
+            case "say":
+                string message = line.TrimStart()[args[0].Length..].TrimStart();
+                var chatError = await server.SayAsync(message);
+                write(chatError == NetworkErrorCode.None ? ServerLogLevel.Info : ServerLogLevel.Warning, chatError switch
+                {
+                    NetworkErrorCode.None => "服务器消息已提交广播。",
+                    NetworkErrorCode.ChatFiltered => "消息包含敏感词，未发送。",
+                    NetworkErrorCode.ServerStopped => "服务器正在关闭。",
+                    _ => "用法：say <内容>，内容不能为空且不能超过 1024 个 UTF-16 单元。"
+                });
+                break;
             case "players" when args.Length == 1:
                 var players = await server.GetStatusAsync();
                 write(ServerLogLevel.Info, $"在线玩家 {players.Players.Length}/{players.MaxPlayers}");
