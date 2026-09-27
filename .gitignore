@@ -19,3 +19,6 @@ copilot-instructions.md
 
 private.pem
 chat-filter.json
+
+server.json
+/src/MetaMystia.Server/logs/

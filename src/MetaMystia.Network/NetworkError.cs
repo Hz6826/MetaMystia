@@ -49,6 +49,8 @@ public enum NetworkErrorCode : ushort
     InvalidServerMessage = 42,
     ChatFiltered = 43,
     InvalidChat = 44,
+    KickedByServer = 45,
+    NotInRoom = 46,
 }
 
 /// <summary>协议错误及可选上下文；版本指拒绝连接的一端。</summary>

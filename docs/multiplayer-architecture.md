@@ -88,7 +88,7 @@ dotnet run --project src/MetaMystia.Flow.Tests -c Release --no-build
 dotnet run --project src/MetaMystia.Server -c Release --no-build -- 40815 16
 ```
 
-`DeployToGame=false` 仅生成本地构建产物，模组输出到项目的 `bin/Release`。独立服务器按回车或 Ctrl+C 退出。
+`DeployToGame=false` 仅生成本地构建产物，模组输出到项目的 `bin/Release`。独立服务器输入命令后按回车执行，使用 `stop` 或 Ctrl+C 退出；管理命令与日志见[服务端控制台](server-console.md)。
 
 普通构建同时部署主模组到 `BepInEx/plugins`、预加载组件到 `BepInEx/patchers/MetaMystia`。网络程序集由 Costura 嵌入主模组；预加载组件在插件发现前执行主模组的模块初始化，注册内嵌依赖解析。
 

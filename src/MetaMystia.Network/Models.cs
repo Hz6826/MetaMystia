@@ -113,6 +113,7 @@ public sealed record ServerOptions
     public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(15);
     public MessageRule[] Messages { get; init; } = MetaMystia.Network.Messages.DefaultRules();
     public ChatFilterOptions ChatFilter { get; init; } = new();
+    public bool LogChat { get; init; }
     internal string? LanKey { get; init; }
 }
 

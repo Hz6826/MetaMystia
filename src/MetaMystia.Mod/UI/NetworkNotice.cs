@@ -38,6 +38,7 @@ public static class NetworkNotice
         NetworkErrorCode.HostOnly => TextId.MpKickHostOnly,
         NetworkErrorCode.InvalidLimit => TextId.NetworkLimit,
         NetworkErrorCode.DuplicateName => TextId.NetworkDuplicateName,
+        NetworkErrorCode.KickedByServer => TextId.NetworkKickedByServer,
         NetworkErrorCode.ChatFiltered => TextId.NetworkChatFiltered,
         NetworkErrorCode.InvalidChat => TextId.NetworkInvalidChat,
         NetworkErrorCode.WorldDataBudgetExceeded or NetworkErrorCode.ResourcesNotReadyOrInvalid or NetworkErrorCode.InvalidHello => TextId.NetworkResources,

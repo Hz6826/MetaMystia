@@ -7,7 +7,7 @@ using Common.UI;
 
 namespace MetaMystia.Network;
 
-public sealed class Server : IAsyncDisposable
+public sealed partial class Server : IAsyncDisposable
 {
     private sealed class Peer
     {
@@ -18,6 +18,7 @@ public sealed class Server : IAsyncDisposable
         internal DateTime Accepted = DateTime.UtcNow;
         internal bool Rejected;
         internal NetworkError? AdmissionError;
+        internal NetworkError? RejectionReason;
         internal readonly HashSet<long> SentResources = [];
     }
     private readonly ServerOptions options;
@@ -39,6 +40,7 @@ public sealed class Server : IAsyncDisposable
     public IPEndPoint Endpoint => (IPEndPoint)listener.LocalEndpoint;
     public event Action<ReceivedMessage>? MessageReceived;
     public event Action<Exception>? CallbackError;
+    public event Action<ServerLogEntry>? Logged;
 
     public Server(ServerOptions options)
     {
@@ -89,7 +91,7 @@ public sealed class Server : IAsyncDisposable
         var peer = new Peer();
         peer.Wire = new(tcp, options.Timeout,
             f => { if (!events.Writer.TryWrite(() => Receive(peer, f))) peer.Wire.Close(NetworkErrorCode.ServerQueueFull); },
-            reason => { _ = Post(() => Remove(peer)); });
+            reason => { _ = Post(() => Remove(peer, peer.RejectionReason ?? reason)); });
         peers.Add(peer);
         int occupied = peers.Count(p => !p.Rejected && p.AdmissionError == null);
         if (options.LanKey != null && lanHost == 0 && !local)
@@ -124,7 +126,12 @@ public sealed class Server : IAsyncDisposable
     }
 
     private void Reject(Peer p, NetworkError error)
-    { p.Rejected = true; p.Wire.Send(new(Kind.Rejected, Protocol.WriteError(error))); p.Wire.Finish(); }
+    {
+        p.Rejected = true;
+        p.RejectionReason = error;
+        Log(ServerLogLevel.Info, $"连接被拒绝 uid={p.Player?.Uid ?? 0}，原因={error.Code}");
+        p.Wire.Send(new(Kind.Rejected, Protocol.WriteError(error))); p.Wire.Finish();
+    }
 
     private void Receive(Peer p, Frame f)
     {
@@ -175,6 +182,7 @@ public sealed class Server : IAsyncDisposable
                 }
                 p.Wire.Send(new(Kind.Welcome, Protocol.Pack(CaptureUpdate(p)), newUid));
                 Publish(p);
+                Log(ServerLogLevel.Info, $"玩家上线 uid={newUid} name={ServerLogEntry.Quote(player.Name)}，在线 {peers.Count(x => x.Player != null)}/{maxPlayers}");
                 return;
             }
             switch (f.Kind)
@@ -197,6 +205,8 @@ public sealed class Server : IAsyncDisposable
                     var updated = p.Player with { Name = profile.Name, Skin = profile.Skin, Scene = profile.Scene, Stage = profile.Stage };
                     if (changedScene) updated = updated with { Motion = new(), HasMotion = false };
                     if (!CanStore(p, updated)) throw new NetworkException(NetworkErrorCode.WorldDataBudgetExceeded);
+                    if (p.Player.Name != updated.Name)
+                        Log(ServerLogLevel.Info, $"玩家改名 uid={p.Player.Uid}，{ServerLogEntry.Quote(p.Player.Name)} → {ServerLogEntry.Quote(updated.Name)}");
                     p.Player = updated;
                     if (changedScene) Publish();
                     else Broadcast(new(Kind.Profile, Protocol.Pack(p.Player with { Resources = null, Motion = new(), HasMotion = false }), p.Player.Uid), p);
@@ -241,6 +251,7 @@ public sealed class Server : IAsyncDisposable
                 if (c.Value < 1 || c.Value > maxPlayers) { error = NetworkErrorCode.InvalidLimit; break; }
                 var created = new Room { Id = AllocateRoomId(), Host = p.Player!.Uid, MaxPlayers = options.LanKey == null ? c.Value : maxPlayers };
                 rooms.Add(created.Id, created);
+                Log(ServerLogLevel.Info, $"创建房间 room={RoomCode.Format(created.Id)} host={created.Host}，上限 {created.MaxPlayers}");
                 Join(p, created, c.Request);
                 if (options.LanKey != null) defaultRoom = created.Id;
                 break;
@@ -281,6 +292,7 @@ public sealed class Server : IAsyncDisposable
                 break;
             default: throw new InvalidDataException();
         }
+        Log(ServerLogLevel.Info, $"房间操作 uid={p.Player!.Uid} command={c.Command} room={RoomCode.Format(c.Room)} value={c.Value}，结果={error.Code}");
         Publish();
         p.Wire.Send(new(Kind.Ack, Protocol.Pack(c with { Error = error })));
         if (options.LanKey != null && c.Command == Command.Join && error.Code != NetworkErrorCode.None) p.Wire.Finish();
@@ -295,7 +307,11 @@ public sealed class Server : IAsyncDisposable
     }
 
     private void Join(Peer p, Room room, long request)
-    { p.SentResources.Clear(); p.Room = room.Id; p.MembershipRequest = request; p.Player = p.Player! with { Membership = checked(++nextMembership), Motion = new(), HasMotion = false }; }
+    {
+        p.SentResources.Clear(); p.Room = room.Id; p.MembershipRequest = request;
+        p.Player = p.Player! with { Membership = checked(++nextMembership), Motion = new(), HasMotion = false };
+        Log(ServerLogLevel.Info, $"玩家加入房间 room={RoomCode.Format(room.Id)} uid={p.Player.Uid}，人数 {peers.Count(x => x.Room == room.Id)}/{room.MaxPlayers}");
+    }
 
     private void Leave(Peer p)
     {
@@ -307,9 +323,11 @@ public sealed class Server : IAsyncDisposable
             return;
         }
         var room = rooms[p.Room];
+        Log(ServerLogLevel.Info, $"玩家离开房间 room={RoomCode.Format(room.Id)} uid={p.Player!.Uid}");
         if (room.Host == p.Player!.Uid)
         {
             rooms.Remove(room.Id);
+            Log(ServerLogLevel.Info, $"房间解散 room={RoomCode.Format(room.Id)}，原因=房主离开");
             foreach (var other in peers.Where(x => x.Room == room.Id).ToArray()) ClearRoom(other);
         }
         else ClearRoom(p);
@@ -318,11 +336,17 @@ public sealed class Server : IAsyncDisposable
     private static void ClearRoom(Peer p)
     { p.SentResources.Clear(); p.Room = 0; p.MembershipRequest = 0; p.Player = p.Player! with { Membership = 0, Motion = new(), HasMotion = false }; }
 
-    private void Remove(Peer p)
+    private void Remove(Peer p, NetworkError reason)
     {
         if (!peers.Contains(p)) return;
         Leave(p); peers.Remove(p);
-        if (p.Player != null) Publish();
+        if (p.Player != null)
+        {
+            Log(reason.Code is NetworkErrorCode.ReceiveTimeout or NetworkErrorCode.InvalidMessage ? ServerLogLevel.Warning : ServerLogLevel.Info,
+                $"玩家下线 uid={p.Player.Uid} name={ServerLogEntry.Quote(p.Player.Name)}，原因={reason.Code}，在线 {peers.Count(x => x.Player != null)}/{maxPlayers}");
+            Publish();
+        }
+        else if (!p.Rejected) Log(ServerLogLevel.Warning, $"未完成握手的连接关闭，原因={reason.Code}");
         if (options.LanKey != null && p.Player?.Uid == lanHost) _ = StopAsync();
     }
 
@@ -331,12 +355,15 @@ public sealed class Server : IAsyncDisposable
         bool chat = f.Type == (ushort)GameMessageType.Chat;
         if (chat && f.Route == Route.World && rules.ContainsKey(f.Type))
         {
-            var error = CheckChat(f.Body);
+            var error = CheckChat(f.Body, out var message);
             if (error != NetworkErrorCode.None)
             {
+                Log(ServerLogLevel.Info, $"聊天已拒绝 uid={p.Player!.Uid}，原因={error}");
                 p.Wire.Send(new(Kind.ChatRejected, Protocol.WriteError(error)));
                 return;
             }
+            if (options.LogChat)
+                Log(ServerLogLevel.Chat, $"uid={p.Player!.Uid} name={ServerLogEntry.Quote(p.Player.Name)}: {ServerLogEntry.Quote(message!)}");
         }
         if (!rules.TryGetValue(f.Type, out var rule) || !rule.Routes.Contains(f.Route) || f.Body.Length > rule.MaxBytes) throw new InvalidDataException("Unregistered route");
         Room? room = rooms.GetValueOrDefault(p.Room);
@@ -366,8 +393,9 @@ public sealed class Server : IAsyncDisposable
         }
     }
 
-    private NetworkErrorCode CheckChat(byte[] body)
+    private NetworkErrorCode CheckChat(byte[] body, out string? message)
     {
+        message = null;
         if (body.Length > 4096) return NetworkErrorCode.InvalidChat;
         ChatPayload? chat;
         try { chat = Protocol.Read<ChatPayload>(body); }
@@ -375,6 +403,7 @@ public sealed class Server : IAsyncDisposable
         { return NetworkErrorCode.InvalidChat; }
         if (chat == null || string.IsNullOrWhiteSpace(chat.Message) || chat.Message.Length > ChatPayload.MaxLength)
             return NetworkErrorCode.InvalidChat;
+        message = chat.Message;
         return chatWords.Any(word => chat.Message.Contains(word, chatComparison))
             ? NetworkErrorCode.ChatFiltered : NetworkErrorCode.None;
     }

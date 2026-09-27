@@ -13,6 +13,7 @@
     "NetworkPlayerUnavailable": "请在主菜单或自由白天加入房间。",
     "NetworkRoomEnded": "房间不存在或本次入房已结束。",
     "NetworkLimit": "人数上限为 1–256，且不能超过独立服务器的总上限。",
+    "NetworkKickedByServer": "你已被服务器管理员断开连接。",
     "NetworkChatFiltered": "消息包含敏感词，未发送。",
     "NetworkInvalidChat": "聊天内容无效或过长，未发送。",
     "NetworkDuplicateName": "服务器中已有同名玩家，请更换名字。",
