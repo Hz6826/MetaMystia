@@ -55,18 +55,12 @@ public static class MpCommands
         var port = new Argument<int?>("port", () => null);
         connect.AddArgument(address);
         connect.AddArgument(port);
-        connect.SetHandler(ctx =>
-        {
-            if (GameSession.IsConnecting || GameSession.HasRoomPeers) { ctx.Log(TextId.MpConnectInProgress.Get()); return; }
-            var value = ctx.ParseResult.GetValueForArgument(address);
-            if (!Uri.TryCreate("tcp://" + value, UriKind.Absolute, out var endpoint))
-            { ctx.Log(TextId.ConnectCommandFail.Get(value)); return; }
-            var number = ctx.ParseResult.GetValueForArgument(port) ?? (endpoint.Port > 0 ? endpoint.Port : GameSession.ConfigPort);
-            if (!ValidPort(number)) return;
-            ctx.Log(TextId.MpConnecting.Get(endpoint.Host, number));
-            GameSession.Connect(endpoint.Host, number);
-        });
+        connect.SetHandler(ctx => Connect(ctx, ctx.ParseResult.GetValueForArgument(address), ctx.ParseResult.GetValueForArgument(port)));
         mp.AddCommand(connect);
+
+        var play = new Command("play", "Connect to the official test server");
+        play.SetHandler(ctx => Connect(ctx, "play.metamystia.net", GameSession.DefaultPort));
+        mp.AddCommand(play);
 
         var rooms = new Command("rooms", "List rooms in the world");
         rooms.SetHandler(ctx =>
@@ -160,13 +154,24 @@ public static class MpCommands
         mp.AddCommand(ipv6);
         mp.SetHandler(ctx => ctx.Log(TextId.NetworkCommands.Get()));
         root.AddCommand(mp);
-        CommandRegistry.RegisterCompletions("mp", 0, "start", "stop", "restart", "status", "id", "connect", "disconnect", "rooms", "create", "join", "leave", "kick", "maxplayers", "continue", "ipv6");
+        CommandRegistry.RegisterCompletions("mp", 0, "start", "stop", "restart", "status", "id", "connect", "play", "disconnect", "rooms", "create", "join", "leave", "kick", "maxplayers", "continue", "ipv6");
         CommandRegistry.RegisterCompletions("mp continue", 0, "day", "prep");
         CommandRegistry.RegisterCompletions("mp ipv6", 0, "enable", "disable");
         CommandRegistry.RegisterCompletions("mp kick", 0, "id", "uid");
         CommandRegistry.RegisterDynamicCompletions("mp kick id", 0, () => PlayerManager.Peers.Values.Select(p => p.Id).ToArray());
         CommandRegistry.RegisterDynamicCompletions("mp kick uid", 0, () => PlayerManager.Peers.Keys.Select(p => p.ToString()).ToArray());
         CommandRegistry.RegisterDynamicCompletions("mp join", 0, () => GameSession.State.Rooms.Select(r => RoomCode.Format(r.Id)).ToArray());
+    }
+
+    private static void Connect(InvocationContext ctx, string address, int? port)
+    {
+        if (GameSession.IsConnecting || GameSession.HasRoomPeers) { ctx.Log(TextId.MpConnectInProgress.Get()); return; }
+        if (!Uri.TryCreate("tcp://" + address, UriKind.Absolute, out var endpoint))
+        { ctx.Log(TextId.ConnectCommandFail.Get(address)); return; }
+        int number = port ?? (endpoint.Port > 0 ? endpoint.Port : GameSession.ConfigPort);
+        if (!ValidPort(number)) return;
+        ctx.Log(TextId.MpConnecting.Get(endpoint.Host, number));
+        GameSession.Connect(endpoint.Host, number);
     }
 
     private static bool ValidPort(int port)

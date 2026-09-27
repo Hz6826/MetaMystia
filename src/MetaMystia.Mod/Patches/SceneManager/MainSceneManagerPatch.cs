@@ -34,6 +34,7 @@ public partial class MainSceneManagerPatch
             Il2CppInteropPatcher.NotifyIfPatched();
             MetricsReporter.OnEnterMainScene();
             Log.Info(MultiplayerStatus.DebugText);
+            InGameConsole.ShowPassive(TextId.ConsoleTestServerWelcome.Get());
         }
         FirstEnterMain = false;
 
